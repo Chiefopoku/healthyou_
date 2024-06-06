@@ -321,19 +321,19 @@ h2 {
     color: #e6e9ef; /* Text color for better readability */
     padding-top: 50px; /* Add some padding at the top for spacing */
     padding: 60px 20px;
-    background-color: #383636; /* CTA background color */
+    background-color: #e3dede; /* CTA background color */
 }
 
 #cta h2 {
     font-size: 30px;
     margin-bottom: 20px;
-    color: #aaaeb6; /* CTA heading color */
+    color: #343537; /* CTA heading color */
 }
 
 #cta p {
     font-size: 18px;
     padding: 20px;
-    color: #929AAB; /* CTA text color */
+    color: #010102; /* CTA text color */
 }
 
 #cta .btn {
