@@ -79,7 +79,7 @@ header {
 
 /* Hero Section Styles */
 .hero {
-    background-image: url('Assets/images/white.jpeg');
+    background-image: url('/Assets/images/white.jpeg');
     background-size: cover;
     background-position: center;
     height: 100vh; /* Full height of the viewport */
