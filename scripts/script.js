@@ -169,12 +169,7 @@ function validateForm(form) {
     return isValid;
 }
 
-// Example of attaching the validateForm function to a form's submit event
-document.getElementById('signupForm').addEventListener('submit', function(event) {
-    if (!validateForm(event.target)) {
-        event.preventDefault();
-    }
-});
+
 // Function to handle user signup
 function handleSignup(event) {
     event.preventDefault();
