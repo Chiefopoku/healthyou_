@@ -157,16 +157,24 @@ function validateForm(form) {
         password.setCustomValidity('');
     }
 
-    if (passwordVerify && password.value !== passwordVerify.value) {
-        isValid = false;
-        passwordVerify.setCustomValidity('Passwords do not match.');
-    } else if (passwordVerify) {
-        passwordVerify.setCustomValidity('');
+    if (passwordVerify) {
+        if (password.value !== passwordVerify.value) {
+            isValid = false;
+            passwordVerify.setCustomValidity('Passwords do not match.');
+        } else {
+            passwordVerify.setCustomValidity('');
+        }
     }
 
     return isValid;
 }
 
+// Example of attaching the validateForm function to a form's submit event
+document.getElementById('signupForm').addEventListener('submit', function(event) {
+    if (!validateForm(event.target)) {
+        event.preventDefault();
+    }
+});
 // Function to handle user signup
 function handleSignup(event) {
     event.preventDefault();
