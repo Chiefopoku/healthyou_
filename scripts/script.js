@@ -87,10 +87,10 @@ function markReminderAsCompleted(button) {
 // Function to delete reminder
 function deleteReminder(button) {
     const reminderItem = button.parentElement;
+    const reminderType = reminderItem.querySelector('strong').innerText.split(': ')[1];
     reminderItem.remove();
 
     // Update the reminders in localStorage
-    const reminderType = reminderItem.querySelector('strong').innerText.split(': ')[1];
     let reminders = JSON.parse(localStorage.getItem('reminders')) || [];
     reminders = reminders.filter(reminder => reminder.type !== reminderType);
     localStorage.setItem('reminders', JSON.stringify(reminders));
@@ -225,6 +225,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+//Invoke initial functions on page load
+document.addEventListener(‘DOMContentLoaded’, function() {
+    const navToggle = document.querySelector(’.nav-toggle’);
+    const navList = document.querySelector(’.nav-list’);
+    const reminderForm = document.getElementById(‘reminder-form’);
+    const signupForm = document.getElementById(‘signupForm’);
+    const loginForm = document.getElementById(‘loginForm’);
+    const logoutButton = document.getElementById(‘logout’);
+    const userNameDisplay = document.getElementById(‘userName’);
 
 // Invoke initial functions on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -236,12 +245,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoutButton = document.getElementById('logout');
     const userNameDisplay = document.getElementById('userName');
 
-    if (navToggle && navList) {
-        navToggle.addEventListener('click', function() {
-            navList.classList.toggle('active');
-        });
+   if (navToggle && navList) {
+    navToggle.addEventListener('click', function() {
+        navList.classList.toggle('active');
+    });
     }
-
     changeHealthTip(); // Immediately change the health tip when the page loads
     setInterval(changeHealthTip, 10000); // Change health tip every 10 seconds
 

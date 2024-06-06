@@ -1,12 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
+from bson.objectid import ObjectId
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Configure MongoDB
-app.config["MONGO_URI"] = "mongodb+srv://kwabenaopokujnr:479NLxEglkWkDSd4@cluster0.d50csvn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+app.config["MONGO_URI"] = "mongodb://localhost:27017/healthyou"
 mongo = PyMongo(app)
 
 @app.route('/')
@@ -59,7 +60,7 @@ def account():
         return render_template('account.html', user=session['user'])
     return redirect(url_for('login'))
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     session.pop('user', None)
     session.pop('email', None)
@@ -98,7 +99,7 @@ def delete_reminder(reminder_id):
     if 'email' not in session:
         return jsonify({"status": "not authorized"}), 403
 
-    mongo.db.reminders.delete_one({"_id": reminder_id})
+    mongo.db.reminders.delete_one({"_id": ObjectId(reminder_id)})
     return jsonify({"status": "success"}), 200
 
 if __name__ == '__main__':
