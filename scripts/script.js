@@ -211,10 +211,19 @@ function handleLogin(event) {
 }
 
 // Function to handle user logout
-function handleLogout() {
-    localStorage.removeItem('currentUser');
-    window.location.href = '/index.html';
+function handleLogout(event) {
+    event.preventDefault(); // Prevent form from submitting
+    localStorage.removeItem('currentUser'); // Remove user data from localStorage
+    window.location.href = './index.html'; // Redirect to the home page
 }
+
+// Add event listener to the logout form
+document.addEventListener('DOMContentLoaded', function() {
+    const logoutForm = document.getElementById('logoutForm');
+    if (logoutForm) {
+        logoutForm.addEventListener('submit', handleLogout);
+    }
+});
 
 
 // Invoke initial functions on page load
