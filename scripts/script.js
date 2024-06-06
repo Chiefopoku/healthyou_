@@ -88,53 +88,59 @@ function markReminderAsCompleted(button) {
 function deleteReminder(button) {
     const reminderItem = button.parentElement;
     reminderItem.remove();
-}
 
-// Function to delete completed reminders
-function deleteCompletedReminders() {
-    const reminderList = document.querySelector('.reminder-list');
-    const completedReminders = reminderList.querySelectorAll('.completed');
-    completedReminders.forEach(reminder => reminder.remove());
+    // Update the reminders in localStorage
+    const reminderType = reminderItem.querySelector('strong').innerText.split(': ')[1];
+    let reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+    reminders = reminders.filter(reminder => reminder.type !== reminderType);
+    localStorage.setItem('reminders', JSON.stringify(reminders));
 }
 
 // Example usage during fetch
 document.addEventListener('DOMContentLoaded', function() {
     const reminderForm = document.getElementById('reminder-form');
     if (reminderForm) {
-        reminderForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const reminderType = document.getElementById('reminder-type').value;
-            const interval = document.getElementById('interval').value;
-
-            const reminder = {
-                type: reminderType,
-                interval: interval
-            };
-
-            displayReminder(reminder);
-            reminderForm.reset(); // Reset form fields
-        });
+        reminderForm.addEventListener('submit', handleReminderForm);
     }
 
-    // Example of pre-existing reminders fetched from an API
-    fetch('/api/reminders')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            const reminderList = document.querySelector('.reminder-list');
-            if (reminderList) {
-                data.reminders.forEach(reminder => {
-                    displayReminder(reminder);
-                });
-            }
-        })
-        .catch(error => console.error('There was a problem with the fetch operation:', error));
+    // Load and display existing reminders
+    loadReminders();
 });
+
+// Function to load and display reminders from localStorage
+function loadReminders() {
+    const reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+    reminders.forEach(reminder => {
+        displayReminder(reminder);
+    });
+}
+
+// Example of pre-existing reminders fetched from an API
+fetch('/api/reminders')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+        const reminderList = document.querySelector('.reminder-list');
+        
+        if (reminderList) {
+            data.reminders.forEach(reminder => {
+                // Check if the reminder already exists in localStorage
+                const exists = reminders.some(localReminder => localReminder.type === reminder.type && localReminder.interval === reminder.interval);
+                if (!exists) {
+                    reminders.push(reminder);
+                    displayReminder(reminder);
+                }
+            });
+            // Update localStorage with new reminders
+            localStorage.setItem('reminders', JSON.stringify(reminders));
+        }
+    })
+    .catch(error => console.error('There was a problem with the fetch operation:', error));
 
 // Function to validate form fields
 function validateForm(form) {
@@ -168,7 +174,6 @@ function validateForm(form) {
 
     return isValid;
 }
-
 
 // Function to handle user signup
 function handleSignup(event) {
@@ -210,6 +215,7 @@ function handleLogout() {
     localStorage.removeItem('currentUser');
     window.location.href = '/index.html';
 }
+
 
 // Invoke initial functions on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -263,101 +269,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-const dailyQuotes = [
-    "Health is wealth.",
-    "Take care of your body. It's the only place you have to live.",
-    "An apple a day keeps the doctor away.",
-    "Your health is an investment, not an expense.",
-    "The greatest wealth is health.",
-];
-
-function displayDailyQuote() {
-    const quoteElement = document.getElementById('daily-quote');
-    if (quoteElement) {
-        const randomIndex = Math.floor(Math.random() * dailyQuotes.length);
-        quoteElement.innerText = dailyQuotes[randomIndex];
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    displayDailyQuote();
-});
-
-function clearLocalStorage() {
-    localStorage.clear();
-    alert('All data cleared!');
-    window.location.reload();
-}
-
-document.getElementById('clearDataButton').addEventListener('click', clearLocalStorage);
-
-
-//bmi calculator
-document.getElementById('bmiForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const weight = parseFloat(document.getElementById('weight').value);
-    const height = parseFloat(document.getElementById('height').value);
-
-    if (weight > 0 && height > 0) {
-        const bmi = weight / (height * height);
-        let resultText = `Your BMI is ${bmi.toFixed(2)}.`;
-
-        if (bmi < 18.5) {
-            resultText += " You are underweight.";
-        } else if (bmi >= 18.5 && bmi < 24.9) {
-            resultText += " You have a normal weight.";
-        } else if (bmi >= 25 && bmi < 29.9) {
-            resultText += " You are overweight.";
-        } else {
-            resultText += " You are obese.";
-        }
-
-        document.getElementById('bmiResult').innerText = resultText;
-    } else {
-        document.getElementById('bmiResult').innerText = "Please enter valid weight and height.";
-    }
-});
-//Hydration Tracker
-let dailyWaterIntake = 0;
-
-function addWaterIntake(amount) {
-    dailyWaterIntake += amount;
-    localStorage.setItem('dailyWaterIntake', dailyWaterIntake);
-    displayWaterIntake();
-}
-
-function displayWaterIntake() {
-    const waterElement = document.getElementById('water-intake');
-    if (waterElement) {
-        waterElement.innerText = `Daily Water Intake: ${dailyWaterIntake} ml`;
-    }
-}
-
-document.getElementById('addWaterButton').addEventListener('click', function() {
-    const amount = parseInt(prompt('Enter water intake in ml:'));
-    addWaterIntake(amount);
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    dailyWaterIntake = parseInt(localStorage.getItem('dailyWaterIntake')) || 0;
-    displayWaterIntake();
-});
-
-
-//User Progress Dashboard
-function displayUserProgress() {
-    const progressElement = document.getElementById('user-progress');
-    const dailySteps = localStorage.getItem('dailySteps') || 0;
-    const dailyWaterIntake = localStorage.getItem('dailyWaterIntake') || 0;
-    if (progressElement) {
-        progressElement.innerHTML = `
-            <p>Daily Steps: ${dailySteps}</p>
-            <p>Daily Water Intake: ${dailyWaterIntake} ml</p>
-        `;
-    }
-}
-
-document.addEventListener('DOMContentLoaded', displayUserProgress);
 
 //notification setting for in- browser
 function showNotification(message) {
@@ -376,37 +287,10 @@ document.getElementById('notifyButton').addEventListener('click', function() {
     showNotification('Time to drink water!');
 });
 
-//reminder completion
-function markReminderAsCompleted(button) {
-    const reminderItem = button.parentNode;
-    reminderItem.style.textDecoration = 'line-through';
+function clearLocalStorage() {
+    localStorage.clear();
+    alert('All data cleared!');
+    window.location.reload();
 }
 
-document.querySelectorAll('.reminder-item button').forEach(button => {
-    button.addEventListener('click', function() {
-        markReminderAsCompleted(button);
-    });
-});
-
-
-//profile greenting
-function displayGreeting() {
-    const user = JSON.parse(localStorage.getItem('currentUser'));
-    const greetingElement = document.getElementById('greeting');
-    const hours = new Date().getHours();
-    let greeting = 'Hello';
-
-    if (hours < 12) {
-        greeting = 'Good Morning';
-    } else if (hours < 18) {
-        greeting = 'Good Afternoon';
-    } else {
-        greeting = 'Good Evening';
-    }
-
-    if (user && greetingElement) {
-        greetingElement.innerText = `${greeting}, ${user.name}!`;
-    }
-}
-
-document.addEventListener('DOMContentLoaded', displayGreeting);
+document.getElementById('clearDataButton').addEventListener('click', clearLocalStorage);
