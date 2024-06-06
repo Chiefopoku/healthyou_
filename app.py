@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -22,6 +22,7 @@ def login():
 
         if user and check_password_hash(user['password'], password):
             session['user'] = user['name']
+            session['email'] = user['email']
             return redirect(url_for('features'))
         else:
             return 'Invalid email or password'
@@ -61,7 +62,44 @@ def account():
 @app.route('/logout')
 def logout():
     session.pop('user', None)
+    session.pop('email', None)
     return redirect(url_for('index'))
+
+@app.route('/set_reminder', methods=['POST'])
+def set_reminder():
+    if 'email' not in session:
+        return redirect(url_for('login'))
+
+    reminder_type = request.form['reminder-type']
+    interval = request.form['interval']
+
+    reminder = {
+        "email": session['email'],
+        "reminder_type": reminder_type,
+        "interval": interval
+    }
+
+    mongo.db.reminders.insert_one(reminder)
+    return redirect(url_for('features'))
+
+@app.route('/get_reminders')
+def get_reminders():
+    if 'email' not in session:
+        return jsonify([])
+
+    reminders = list(mongo.db.reminders.find({"email": session['email']}))
+    for reminder in reminders:
+        reminder['_id'] = str(reminder['_id'])
+
+    return jsonify(reminders)
+
+@app.route('/delete_reminder/<reminder_id>', methods=['DELETE'])
+def delete_reminder(reminder_id):
+    if 'email' not in session:
+        return jsonify({"status": "not authorized"}), 403
+
+    mongo.db.reminders.delete_one({"_id": reminder_id})
+    return jsonify({"status": "success"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
