@@ -177,7 +177,7 @@ Meet the Team
 - **Emmanuel Opoku-Adjei**
   - LinkedIn: [Emmanuel Opoku-Adjei](https://www.linkedin.com/in/emmanuel-opoku-adjei)
   - GitHub: [Chiefopoku](https://github.com/Chiefopoku)
-  - Twitter: [@Chiefopoku](https://twitter.com/Chiefopoku)
+  - Twitter: [@Chiefopoku](https://x.com/chieffzz)
 
 Project Repository
 
