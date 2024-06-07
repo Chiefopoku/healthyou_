@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthYou</title>
+    <title>HealthYou - Account</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <header>
-        <div class="logo"><a href="/">HealthYou</a></div>
+        <div class="logo"><a href="{{ url_for('/') }}">HealthYou</a></div>
         <nav class="nav">
-            <div class="nav-toggle">
+            <div class="nav-toggle" id="navToggle">
                 <div class="nav-toggle-bar"></div>
                 <div class="nav-toggle-bar"></div>
                 <div class="nav-toggle-bar"></div>
             </div>
-            <ul class="nav-list">
+            <ul class="nav-list" id="navList">
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('features') }}">Features</a></li>
                 <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
@@ -23,37 +24,68 @@
         </nav>
     </header>
 
-    <section class="notification-preferences card">
-        <h2>Notification Preferences</h2>
-        <form action="update_notifications.php" method="post">
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="push-notifications"> Enable Push Notifications
-                </label>
+    <main>
+        <section class="account-info card">
+            <h1>Account Settings</h1>
+            <div class="profile-info">
+                <h2>Profile Information</h2>
+                <form id="profileForm" action="{{ url_for('update_profile') }}" method="post">
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" value="{{ user.name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="birthday">Birthday:</label>
+                        <input type="date" id="birthday" name="birthday" value="{{ user.birthday }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sex">Sex:</label>
+                        <select id="sex" name="sex" required>
+                            <option value="male" {% if user.sex == 'male' %}selected{% endif %}>Male</option>
+                            <option value="female" {% if user.sex == 'female' %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Update Profile</button>
+                </form>
             </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="sms-notifications"> Enable SMS Notifications
-                </label>
-            </div>
-            <div class="form-group">
-                <label for="notification-sound">Notification Sound Preferences:</label>
-                <select id="notification-sound" name="notification-sound">
-                    <option value="default">Default Sound</option>
-                    <option value="custom">Custom Sound</option>
-                </select>
-            </div>
-            <button type="submit" class="btn">Save Changes</button>
-        </form>
-    </section>
-    <section class="data-management card">
-        <h2>Data Management</h2>
-        <div class="data-actions">
-            <button class="export-data" onclick="exportData();">Export Data</button>
-            <button class="delete-account" onclick="confirmDelete();">Delete Account</button>
-        </div>
-    </section>
+        </section>
 
+        <section class="notification-preferences card">
+            <h2>Notification Preferences</h2>
+            <form id="notificationForm" action="{{ url_for('update_notifications') }}" method="post">
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="push-notifications" {% if user.push_notifications %}checked{% endif %}> Enable Push Notifications
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="sms-notifications" {% if user.sms_notifications %}checked{% endif %}> Enable SMS Notifications
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="notification-sound">Notification Sound Preferences:</label>
+                    <select id="notification-sound" name="notification-sound">
+                        <option value="default" {% if user.notification_sound == 'default' %}selected{% endif %}>Default Sound</option>
+                        <option value="custom" {% if user.notification_sound == 'custom' %}selected{% endif %}>Custom Sound</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Save Changes</button>
+            </form>
+        </section>
+
+        <section class="data-management card">
+            <h2>Data Management</h2>
+            <div class="data-actions">
+                <button class="export-data btn" onclick="exportData();">Export Data</button>
+                <button class="delete-account btn" onclick="confirmDelete();">Delete Account</button>
+            </div>
+        </section>
+    </main>
     <footer>
         <ul>
             <li><a href="{{ url_for('index') }}">Home</a></li>
@@ -69,5 +101,22 @@
         <p>Contact us: healthyou@gmail.com | (+233) 2454-86439</p>
     </footer>
     <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
+    <script>
+        document.getElementById('navToggle').addEventListener('click', function() {
+            document.getElementById('navList').classList.toggle('active');
+        });
+
+        function exportData() {
+            // Implement data export functionality
+            alert('Data export functionality to be implemented.');
+        }
+
+        function confirmDelete() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                // Implement account deletion functionality
+                alert('Account deletion functionality to be implemented.');
+            }
+        }
+    </script>
 </body>
 </html>

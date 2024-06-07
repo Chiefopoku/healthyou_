@@ -1,12 +1,36 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_pymongo import PyMongo
-from bson.objectid import ObjectId
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with a real secret key
 
-app.config['MONGO_URI'] = 'mongodb+srv://kwabenaopokujnr:<password>@cluster0.d50csvn.mongodb.net/'  # Update with your MongoDB URI
-mongo = PyMongo(app)
+# Configure SQLite database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///healthyou.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+# Define User model
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    birthday = db.Column(db.String(10), nullable=False)
+    sex = db.Column(db.String(10), nullable=False)
+
+# Define Reminder model
+class Reminder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    reminder_type = db.Column(db.String(100), nullable=False)
+    interval = db.Column(db.String(20), nullable=False)
+
+# Define Contact model
+class Contact(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.Text, nullable=False)
 
 @app.route('/')
 def index():
@@ -30,13 +54,9 @@ def signup():
             flash('Passwords do not match!', 'error')
             return redirect(url_for('signup'))
 
-        mongo.db.users.insert_one({
-            'name': name,
-            'email': email,
-            'password': password,
-            'birthday': birthday,
-            'sex': sex
-        })
+        new_user = User(name=name, email=email, password=password, birthday=birthday, sex=sex)
+        db.session.add(new_user)
+        db.session.commit()
         
         flash('Account created successfully!', 'success')
         return redirect(url_for('login'))
@@ -49,7 +69,7 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        user = mongo.db.users.find_one({'email': email, 'password': password})
+        user = User.query.filter_by(email=email, password=password).first()
 
         if user:
             flash('Login successful!', 'success')
@@ -73,10 +93,9 @@ def set_reminder():
     reminder_type = request.form['reminder-type']
     interval = request.form['interval']
 
-    mongo.db.reminders.insert_one({
-        'reminder_type': reminder_type,
-        'interval': interval
-    })
+    new_reminder = Reminder(reminder_type=reminder_type, interval=interval)
+    db.session.add(new_reminder)
+    db.session.commit()
 
     flash('Reminder set successfully!', 'success')
     return redirect(url_for('index'))
@@ -87,14 +106,13 @@ def contact():
     email = request.form['contactEmail']
     message = request.form['contactMessage']
 
-    mongo.db.contacts.insert_one({
-        'name': name,
-        'email': email,
-        'message': message
-    })
+    new_contact = Contact(name=name, email=email, message=message)
+    db.session.add(new_contact)
+    db.session.commit()
 
     flash('Message sent successfully!', 'success')
     return redirect(url_for('about'))
 
 if __name__ == '__main__':
+    db.create_all()  # Create tables if they don't exist
     app.run(debug=True)
