@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Configure MongoDB
-app.config["MONGO_URI"] = "mongodb+srv://kwabenaopokujnr:479NLxEglkWkDSd4@cluster0.d50csvn.mongodb.net/"
+app.config["MONGO_URI"] = "mongodb+srv://kwabenaopokujnr:479NLxEglkWkDSd4@cluster0.d50csvn.mongodb.net/healthyou"
 mongo = PyMongo(app)
 
 @app.route('/')
@@ -17,7 +17,7 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        data = request.get_json()
+        data = request.json
         email = data.get('email')
         password = data.get('password')
         user = mongo.db.users.find_one({"email": email})

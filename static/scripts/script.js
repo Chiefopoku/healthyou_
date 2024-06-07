@@ -1,4 +1,5 @@
-// Detailed health tips array
+// healthTips.js
+
 const healthTips = [
     "Drink at least 8 cups of water daily. Staying hydrated is crucial for maintaining energy levels and overall health.",
     "Take a 5-minute break every hour to stretch. This helps reduce muscle tension and improve circulation.",
@@ -29,7 +30,6 @@ const healthTips = [
     "Stay positive and practice self-compassion. Be kind to yourself and focus on your progress, not perfection."
 ];
 
-// Function to change the health tip displayed
 function changeHealthTip() {
     const tipElement = document.getElementById('health-tip');
     if (tipElement) {
@@ -40,14 +40,14 @@ function changeHealthTip() {
     }
 }
 
-// Set an interval to change the health tip every 10 seconds
-setInterval(changeHealthTip, 10000);
+document.addEventListener('DOMContentLoaded', function() {
+    changeHealthTip(); // Immediately change the health tip when the page loads
+    setInterval(changeHealthTip, 10000); // Change health tip every 10 seconds
+});
 
-// Invoke changeHealthTip on page load
-document.addEventListener('DOMContentLoaded', changeHealthTip);
 
+// reminders.js
 
-// Function to handle reminder form submission
 function handleReminderForm(event) {
     event.preventDefault();
 
@@ -55,7 +55,7 @@ function handleReminderForm(event) {
     const interval = document.getElementById('interval').value;
 
     const reminder = { reminderType, interval };
-
+    
     fetch('/set_reminder', {
         method: 'POST',
         headers: {
@@ -70,7 +70,6 @@ function handleReminderForm(event) {
     });
 }
 
-// Function to display reminders on the page
 function displayReminder(reminder) {
     const reminderList = document.querySelector('.reminder-list');
     if (reminderList) {
@@ -87,7 +86,6 @@ function displayReminder(reminder) {
     }
 }
 
-// Function to delete reminder
 function deleteReminder(reminderId) {
     fetch(`/delete_reminder/${reminderId}`, {
         method: 'DELETE'
@@ -98,7 +96,6 @@ function deleteReminder(reminderId) {
     });
 }
 
-// Function to load and display reminders from the server
 function loadReminders() {
     fetch('/get_reminders')
         .then(response => response.json())
@@ -111,52 +108,67 @@ function loadReminders() {
         });
 }
 
-// Invoke loadReminders on page load if reminder form exists
 document.addEventListener('DOMContentLoaded', function() {
     const reminderForm = document.getElementById('reminder-form');
     if (reminderForm) {
         reminderForm.addEventListener('submit', handleReminderForm);
-        loadReminders();
+        loadReminders(); // Load reminders from the server
     }
 });
 
-// Function to validate signup form
-function validateForm(form) {
-    let isValid = true;
-    const email = form.elements['email'];
-    const password = form.elements['password'];
-    const passwordVerify = form.elements['passwordVerify'];
 
-    if (!email.value.includes('@')) {
-        isValid = false;
-        email.setCustomValidity('Please enter a valid email address.');
-    } else {
-        email.setCustomValidity('');
+/document.addEventListener('DOMContentLoaded', function() {
+    const signupForm = document.getElementById('signupForm');
+    if (signupForm) {
+        signupForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (validateForm(signupForm)) {
+                handleSignup(event);
+            }
+        });
     }
 
-    if (password.value.length <= 8) {
-        isValid = false;
-        password.setCustomValidity('Password must be at least 8 characters long.');
-    } else {
-        password.setCustomValidity('');
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
     }
 
-    if (password.value !== passwordVerify.value) {
-        isValid = false;
-        passwordVerify.setCustomValidity('Passwords do not match.');
-    } else {
-        passwordVerify.setCustomValidity('');
+    const logoutButton = document.getElementById('logout');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', handleLogout);
     }
 
-    return isValid;
-}
+    function validateForm(form) {
+        let isValid = true;
+        const email = form.elements['email'];
+        const password = form.elements['password'];
+        const passwordVerify = form.elements['passwordVerify'];
 
+        if (!email.value.includes('@')) {
+            isValid = false;
+            email.setCustomValidity('Please enter a valid email address.');
+        } else {
+            email.setCustomValidity('');
+        }
 
-// Function to handle user signup
-document.getElementById('signupForm').addEventListener('submit', function(event) {
-    if (!validateForm(event.target)) {
-        event.preventDefault();
-    } else {
+        if (password.value.length < 8) {
+            isValid = false;
+            password.setCustomValidity('Password must be at least 8 characters long.');
+        } else {
+            password.setCustomValidity('');
+        }
+
+        if (passwordVerify && password.value !== passwordVerify.value) {
+            isValid = false;
+            passwordVerify.setCustomValidity('Passwords do not match.');
+        } else if (passwordVerify) {
+            passwordVerify.setCustomValidity('');
+        }
+
+        return isValid;
+    }
+
+    function handleSignup(event) {
         event.preventDefault();
         const userData = {
             name: document.getElementById('name').value,
@@ -177,53 +189,58 @@ document.getElementById('signupForm').addEventListener('submit', function(event)
             if (response.ok) {
                 window.location.href = './login.html'; // Redirect to login page
             } else {
-                alert('Signup failed. Please try again.');
+                response.json().then(data => {
+                    alert('Signup failed: ' + data.message);
+                });
             }
+        }).catch(error => {
+            console.error('Signup failed:', error);
+            alert('Signup failed. Please try again.');
+        });
+    }
+
+    function handleLogin(event) {
+        event.preventDefault();
+        const email = event.target.elements['email'].value;
+        const password = event.target.elements['password'].value;
+
+        fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = './features.html'; // Redirect to features page
+            } else {
+                response.json().then(data => {
+                    alert('Login failed: ' + data.message);
+                });
+            }
+        }).catch(error => {
+            console.error('Login failed:', error);
+            alert('Login failed. Please try again.');
+        });
+    }
+
+    function handleLogout(event) {
+        event.preventDefault(); // Prevent form from submitting
+        fetch('/logout', {
+            method: 'POST'
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = './index.html'; // Redirect to the home page
+            }
+        }).catch(error => {
+            console.error('Logout failed:', error);
+            alert('Logout failed. Please try again.');
         });
     }
 });
 
-// Function to handle user login
-document.getElementById('loginForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const email = event.target.elements['email'].value;
-    const password = event.target.elements['password'].value;
 
-    fetch('/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-    }).then(response => {
-        if (response.ok) {
-            window.location.href = './features.html'; // Redirect to features page
-        } else {
-            alert('Login failed: Invalid email or password');
-        }
-    });
-});
-
-// Function to handle user logout
-function handleLogout(event) {
-    event.preventDefault(); // Prevent form from submitting
-    fetch('/logout', {
-        method: 'POST'
-    }).then(response => {
-        if (response.ok) {
-            window.location.href = './index.html'; // Redirect to the home page
-        }
-    });
-}
-
-// Add event listener to the logout form
-document.addEventListener('DOMContentLoaded', function() {
-    const logoutForm = document.getElementById('logoutForm');
-    if (logoutForm) {
-        logoutForm.addEventListener('submit', handleLogout);
-    }
-});
-
+// notifications.js
 
 // Function to show browser notifications
 function showNotification(message) {
