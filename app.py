@@ -1,6 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
 app = Flask(__name__)
@@ -29,6 +28,13 @@ class Reminder(db.Model):
     interval = db.Column(db.String(20), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+# Define Contact model
+class Contact(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -53,14 +59,19 @@ def signup():
             flash('Passwords do not match!', 'error')
             return redirect(url_for('signup'))
 
-        hashed_password = generate_password_hash(password)
-        new_user = User(name=name, email=email, password=hashed_password, birthday=birthday, sex=sex)
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash('Email already exists!', 'error')
+            return redirect(url_for('signup'))
+
+        new_user = User(name=name, email=email, password=password, birthday=birthday, sex=sex)
         db.session.add(new_user)
         db.session.commit()
-
+        
         flash('Account created successfully!', 'success')
+        session['user_id'] = new_user.id
         return redirect(url_for('features'))
-
+    
     return render_template('signup.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -69,68 +80,45 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(email=email, password=password).first()
 
-        if user and check_password_hash(user.password, password):
-            session['user_id'] = user.id
-            session['user_name'] = user.name
+        if user:
             flash('Login successful!', 'success')
+            session['user_id'] = user.id
             return redirect(url_for('features'))
         else:
             flash('Invalid credentials!', 'error')
             return redirect(url_for('login'))
-
+    
     return render_template('login.html')
 
 @app.route('/account')
 def account():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('account.html', user=session['user_name'])
+    user = User.query.get(session['user_id'])
+    return render_template('account.html', user=user)
 
-@app.route('/logout', methods=['POST'])
-def logout():
-    session.pop('user_id', None)
-    session.pop('user_name', None)
-    flash('Logged out successfully!', 'success')
-    return redirect(url_for('index'))
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 @app.route('/set_reminder', methods=['POST'])
 def set_reminder():
     if 'user_id' not in session:
-        return jsonify({"status": "not authorized"}), 403
-
+        flash('Please log in to set a reminder', 'error')
+        return redirect(url_for('login'))
+    
     reminder_type = request.form['reminder-type']
     interval = request.form['interval']
+    user_id = session['user_id']
 
-    new_reminder = Reminder(reminder_type=reminder_type, interval=interval, user_id=session['user_id'])
+    new_reminder = Reminder(reminder_type=reminder_type, interval=interval, user_id=user_id)
     db.session.add(new_reminder)
     db.session.commit()
 
     flash('Reminder set successfully!', 'success')
     return redirect(url_for('features'))
-
-@app.route('/get_reminders')
-def get_reminders():
-    if 'user_id' not in session:
-        return jsonify([])
-
-    reminders = Reminder.query.filter_by(user_id=session['user_id']).all()
-    reminders_list = [{"id": r.id, "reminder_type": r.reminder_type, "interval": r.interval} for r in reminders]
-    return jsonify(reminders_list)
-
-@app.route('/delete_reminder/<int:reminder_id>', methods=['DELETE'])
-def delete_reminder(reminder_id):
-    if 'user_id' not in session:
-        return jsonify({"status": "not authorized"}), 403
-
-    reminder = Reminder.query.filter_by(id=reminder_id, user_id=session['user_id']).first()
-    if reminder:
-        db.session.delete(reminder)
-        db.session.commit()
-        return jsonify({"status": "success"}), 200
-    else:
-        return jsonify({"status": "not found"}), 404
 
 @app.route('/contact', methods=['POST'])
 def contact():
@@ -145,6 +133,18 @@ def contact():
     flash('Message sent successfully!', 'success')
     return redirect(url_for('about'))
 
+@app.route('/get_reminders')
+def get_reminders():
+    if 'user_id' not in session:
+        return jsonify([])
+
+    reminders = Reminder.query.filter_by(user_id=session['user_id']).all()
+    return jsonify([{
+        'id': reminder.id,
+        'reminder_type': reminder.reminder_type,
+        'interval': reminder.interval
+    } for reminder in reminders])
+
 if __name__ == '__main__':
-    db.create_all()
+    db.create_all()  # Create tables if they don't exist
     app.run(debug=True)
