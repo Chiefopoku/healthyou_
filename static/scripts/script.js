@@ -279,3 +279,16 @@ document.addEventListener('DOMContentLoaded', function() {
         clearDataButton.addEventListener('click', clearLocalStorage);
     }
 });
+
+// navToggle.js
+
+document.addEventListener('DOMContentLoaded', function() {
+    const navToggle = document.querySelector('.nav-toggle');
+    const navList = document.querySelector('.nav-list');
+
+    if (navToggle && navList) {
+        navToggle.addEventListener('click', function() {
+            navList.classList.toggle('active');
+        });
+    }
+});
