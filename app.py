@@ -7,7 +7,9 @@ app.secret_key = 'your_secret_key'  # Replace with a real secret key
 
 # Configure SQLite database
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'healthyou.db')
+db_path = os.path.join(basedir, 'healthyou.db')
+print(f"Database path: {db_path}")  # Debug print
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -67,11 +69,11 @@ def signup():
         new_user = User(name=name, email=email, password=password, birthday=birthday, sex=sex)
         db.session.add(new_user)
         db.session.commit()
-        
+
         flash('Account created successfully!', 'success')
         session['user_id'] = new_user.id
         return redirect(url_for('features'))
-    
+
     return render_template('signup.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -89,7 +91,7 @@ def login():
         else:
             flash('Invalid credentials!', 'error')
             return redirect(url_for('login'))
-    
+
     return render_template('login.html')
 
 @app.route('/account')
@@ -108,7 +110,7 @@ def set_reminder():
     if 'user_id' not in session:
         flash('Please log in to set a reminder', 'error')
         return redirect(url_for('login'))
-    
+
     reminder_type = request.form['reminder-type']
     interval = request.form['interval']
     user_id = session['user_id']
