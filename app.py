@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Configure MongoDB
-app.config["MONGO_URI"] = "mongodb://localhost:27017/healthyou"
+app.config["MONGO_URI"] = "mongodb+srv://kwabenaopokujnr:479NLxEglkWkDSd4@cluster0.d50csvn.mongodb.net/"
 mongo = PyMongo(app)
 
 @app.route('/')
@@ -17,37 +17,39 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        print("Connecting to MongoDB...")
-        print("mongodb://localhost:27017/healthyou:", app.config["mongodb://localhost:27017/healthyou"])
-        print("MongoDB Client:", mongo)
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
         user = mongo.db.users.find_one({"email": email})
-        print("User found:", user)
 
         if user and check_password_hash(user['password'], password):
             session['user'] = user['name']
             session['email'] = user['email']
-            return redirect(url_for('features'))
+            return jsonify({"status": "success"}), 200
         else:
-            return 'Invalid email or password'
+            return jsonify({"status": "failure", "message": "Invalid email or password"}), 401
     return render_template('login.html')
 
-@app.route('/signup', methods=['POST'])
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    data = request.get_json()
-    name = data['name']
-    email = data['email']
-    password = data['password']
-    hashed_password = generate_password_hash(password)
+    if request.method == 'POST':
+        data = request.form
+        name = data['name']
+        email = data['email']
+        password = data['password']
+        hashed_password = generate_password_hash(password)
 
-    mongo.db.users.insert_one({
-        "name": name,
-        "email": email,
-        "password": hashed_password
-    })
+        if mongo.db.users.find_one({"email": email}):
+            return jsonify({"status": "failure", "message": "Email already exists"}), 400
 
-    return jsonify({"status": "success"}), 201
+        mongo.db.users.insert_one({
+            "name": name,
+            "email": email,
+            "password": hashed_password
+        })
+
+        return jsonify({"status": "success"}), 200
+    return render_template('signup.html')
 
 @app.route('/features')
 def features():
@@ -67,15 +69,16 @@ def account():
 def logout():
     session.pop('user', None)
     session.pop('email', None)
-    return redirect(url_for('index'))
+    return jsonify({"status": "success"}), 200
 
 @app.route('/set_reminder', methods=['POST'])
 def set_reminder():
     if 'email' not in session:
-        return redirect(url_for('login'))
+        return jsonify({"status": "not authorized"}), 403
 
-    reminder_type = request.form['reminder-type']
-    interval = request.form['interval']
+    data = request.form
+    reminder_type = data['reminder-type']
+    interval = data['interval']
 
     reminder = {
         "email": session['email'],
@@ -84,7 +87,7 @@ def set_reminder():
     }
 
     mongo.db.reminders.insert_one(reminder)
-    return redirect(url_for('features'))
+    return jsonify({"status": "success"}), 200
 
 @app.route('/get_reminders')
 def get_reminders():
