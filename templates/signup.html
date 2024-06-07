@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HealthYou</title>
-    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
 </head>
 <body>
     <header>
-        <div class="logo"><a href="/">HealthYou</a></div>
+        <div class="logo"><a href="{{ url_for('index') }}">HealthYou</a></div>
         <nav class="nav">
             <div class="nav-toggle">
                 <div class="nav-toggle-bar"></div>
@@ -16,9 +16,9 @@
                 <div class="nav-toggle-bar"></div>
             </div>
             <ul class="nav-list">
-                <li><a href="./index.html">Home</a></li>
-                <li><a href="./features.html">Features</a></li>
-                <li><a href="./login.html">Login</a></li>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('features') }}">Features</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
             </ul>
         </nav>
     </header>

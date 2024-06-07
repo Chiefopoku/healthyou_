@@ -292,3 +292,133 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const signupForm = document.getElementById('signupForm');
+    if (signupForm) {
+        signupForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (validateForm(signupForm)) {
+                handleSignup(event);
+            }
+        });
+    }
+
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+
+    const logoutButton = document.getElementById('logout');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', handleLogout);
+    }
+
+    const navToggle = document.getElementById('navToggle');
+    const navList = document.getElementById('navList');
+    if (navToggle && navList) {
+        navToggle.addEventListener('click', function() {
+            navList.classList.toggle('active');
+        });
+    }
+
+    function validateForm(form) {
+        let isValid = true;
+        const email = form.elements['email'];
+        const password = form.elements['password'];
+        const passwordVerify = form.elements['passwordVerify'];
+
+        if (!email.value.includes('@')) {
+            isValid = false;
+            email.setCustomValidity('Please enter a valid email address.');
+        } else {
+            email.setCustomValidity('');
+        }
+
+        if (password.value.length < 8) {
+            isValid = false;
+            password.setCustomValidity('Password must be at least 8 characters long.');
+        } else {
+            password.setCustomValidity('');
+        }
+
+        if (passwordVerify && password.value !== passwordVerify.value) {
+            isValid = false;
+            passwordVerify.setCustomValidity('Passwords do not match.');
+        } else if (passwordVerify) {
+            passwordVerify.setCustomValidity('');
+        }
+
+        return isValid;
+    }
+
+    function handleSignup(event) {
+        event.preventDefault();
+        const userData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            passwordVerify: document.getElementById('passwordVerify').value,
+            birthday: document.getElementById('birthday').value,
+            sex: document.getElementById('sex').value
+        };
+
+        fetch('/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(userData)
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = './login.html'; // Redirect to login page
+            } else {
+                response.json().then(data => {
+                    alert('Signup failed: ' + data.message);
+                });
+            }
+        }).catch(error => {
+            console.error('Signup failed:', error);
+            alert('Signup failed. Please try again.');
+        });
+    }
+
+    function handleLogin(event) {
+        event.preventDefault();
+        const email = event.target.elements['email'].value;
+        const password = event.target.elements['password'].value;
+
+        fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = './features.html'; // Redirect to features page
+            } else {
+                response.json().then(data => {
+                    alert('Login failed: ' + data.message);
+                });
+            }
+        }).catch(error => {
+            console.error('Login failed:', error);
+            alert('Login failed. Please try again.');
+        });
+    }
+
+    function handleLogout(event) {
+        event.preventDefault(); // Prevent form from submitting
+        fetch('/logout', {
+            method: 'POST'
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = './index.html'; // Redirect to the home page
+            }
+        }).catch(error => {
+            console.error('Logout failed:', error);
+            alert('Logout failed. Please try again.');
+        });
+    }
+});
