@@ -127,7 +127,7 @@ function validateForm(form) {
         email.setCustomValidity('');
     }
 
-    if (password.value.length < 8) {
+    if (password.value.length <= 8) {
         isValid = false;
         password.setCustomValidity('Password must be at least 8 characters long.');
     } else {
