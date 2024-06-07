@@ -1,112 +1,100 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_pymongo import PyMongo
-from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = 'your_secret_key'  # Replace with a real secret key
 
-# Configure MongoDB
-app.config["MONGO_URI"] = "mongodb+srv://kwabenaopokujnr:479NLxEglkWkDSd4@cluster0.d50csvn.mongodb.net/healthyou"
+app.config['MONGO_URI'] = 'mongodb+srv://kwabenaopokujnr:<password>@cluster0.d50csvn.mongodb.net/'  # Update with your MongoDB URI
 mongo = PyMongo(app)
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        data = request.json
-        email = data.get('email')
-        password = data.get('password')
-        user = mongo.db.users.find_one({"email": email})
-
-        if user and check_password_hash(user['password'], password):
-            session['user'] = user['name']
-            session['email'] = user['email']
-            return jsonify({"status": "success"}), 200
-        else:
-            return jsonify({"status": "failure", "message": "Invalid email or password"}), 401
-    return render_template('login.html')
+@app.route('/features')
+def features():
+    return render_template('features.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        data = request.form
-        name = data['name']
-        email = data['email']
-        password = data['password']
-        hashed_password = generate_password_hash(password)
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+        password_verify = request.form['passwordVerify']
+        birthday = request.form['birthday']
+        sex = request.form['sex']
 
-        if mongo.db.users.find_one({"email": email}):
-            return jsonify({"status": "failure", "message": "Email already exists"}), 400
+        if password != password_verify:
+            flash('Passwords do not match!', 'error')
+            return redirect(url_for('signup'))
 
         mongo.db.users.insert_one({
-            "name": name,
-            "email": email,
-            "password": hashed_password
+            'name': name,
+            'email': email,
+            'password': password,
+            'birthday': birthday,
+            'sex': sex
         })
-
-        return jsonify({"status": "success"}), 200
+        
+        flash('Account created successfully!', 'success')
+        return redirect(url_for('login'))
+    
     return render_template('signup.html')
 
-@app.route('/features')
-def features():
-    return render_template('features.html')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        user = mongo.db.users.find_one({'email': email, 'password': password})
+
+        if user:
+            flash('Login successful!', 'success')
+            return redirect(url_for('account'))
+        else:
+            flash('Invalid credentials!', 'error')
+            return redirect(url_for('login'))
+    
+    return render_template('login.html')
+
+@app.route('/account')
+def account():
+    return render_template('account.html')
 
 @app.route('/about')
 def about():
     return render_template('about.html')
 
-@app.route('/account')
-def account():
-    if 'user' in session:
-        return render_template('account.html', user=session['user'])
-    return redirect(url_for('login'))
-
-@app.route('/logout', methods=['POST'])
-def logout():
-    session.pop('user', None)
-    session.pop('email', None)
-    return jsonify({"status": "success"}), 200
-
 @app.route('/set_reminder', methods=['POST'])
 def set_reminder():
-    if 'email' not in session:
-        return jsonify({"status": "not authorized"}), 403
+    reminder_type = request.form['reminder-type']
+    interval = request.form['interval']
 
-    data = request.form
-    reminder_type = data['reminder-type']
-    interval = data['interval']
+    mongo.db.reminders.insert_one({
+        'reminder_type': reminder_type,
+        'interval': interval
+    })
 
-    reminder = {
-        "email": session['email'],
-        "reminder_type": reminder_type,
-        "interval": interval
-    }
+    flash('Reminder set successfully!', 'success')
+    return redirect(url_for('index'))
 
-    mongo.db.reminders.insert_one(reminder)
-    return jsonify({"status": "success"}), 200
+@app.route('/contact', methods=['POST'])
+def contact():
+    name = request.form['contactName']
+    email = request.form['contactEmail']
+    message = request.form['contactMessage']
 
-@app.route('/get_reminders')
-def get_reminders():
-    if 'email' not in session:
-        return jsonify([])
+    mongo.db.contacts.insert_one({
+        'name': name,
+        'email': email,
+        'message': message
+    })
 
-    reminders = list(mongo.db.reminders.find({"email": session['email']}))
-    for reminder in reminders:
-        reminder['_id'] = str(reminder['_id'])
-
-    return jsonify(reminders)
-
-@app.route('/delete_reminder/<reminder_id>', methods=['DELETE'])
-def delete_reminder(reminder_id):
-    if 'email' not in session:
-        return jsonify({"status": "not authorized"}), 403
-
-    mongo.db.reminders.delete_one({"_id": ObjectId(reminder_id)})
-    return jsonify({"status": "success"}), 200
+    flash('Message sent successfully!', 'success')
+    return redirect(url_for('about'))
 
 if __name__ == '__main__':
     app.run(debug=True)
