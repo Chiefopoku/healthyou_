@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Configure MongoDB
-app.config["MONGO_URI"] = "mongodb+srv://kwabenaopokujnr:479NLxEglkWkDSd4@cluster0.d50csvn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+app.config["MONGO_URI"] = "mongodb://localhost:27017/healthyou"
 mongo = PyMongo(app)
 
 @app.route('/')
@@ -19,7 +19,11 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        print("Connecting to MongoDB...")
+        print("mongodb://localhost:27017/healthyou:", app.config["mongodb://localhost:27017/healthyou"])
+        print("MongoDB Client:", mongo)
         user = mongo.db.users.find_one({"email": email})
+        print("User found:", user)
 
         if user and check_password_hash(user['password'], password):
             session['user'] = user['name']
@@ -29,22 +33,21 @@ def login():
             return 'Invalid email or password'
     return render_template('login.html')
 
-@app.route('/signup', methods=['GET', 'POST'])
+@app.route('/signup', methods=['POST'])
 def signup():
-    if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        password = request.form['password']
-        hashed_password = generate_password_hash(password)
+    data = request.get_json()
+    name = data['name']
+    email = data['email']
+    password = data['password']
+    hashed_password = generate_password_hash(password)
 
-        mongo.db.users.insert_one({
-            "name": name,
-            "email": email,
-            "password": hashed_password
-        })
+    mongo.db.users.insert_one({
+        "name": name,
+        "email": email,
+        "password": hashed_password
+    })
 
-        return redirect(url_for('login'))
-    return render_template('signup.html')
+    return jsonify({"status": "success"}), 201
 
 @app.route('/features')
 def features():

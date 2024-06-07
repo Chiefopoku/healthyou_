@@ -144,23 +144,23 @@ function validateForm(form) {
     return isValid;
 }
 
-// Function to handle user signup
-function handleSignup(event) {
+document.getElementById('signupForm').addEventListener('submit', function(event) {
     event.preventDefault();
     const userData = {
-        name: event.target.elements['name'].value,
-        email: event.target.elements['email'].value,
-        password: event.target.elements['password'].value,
-        birthday: event.target.elements['birthday'].value,
-        sex: event.target.elements['sex'].value
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+        passwordVerify: document.getElementById('passwordVerify').value,
+        birthday: document.getElementById('birthday').value,
+        sex: document.getElementById('sex').value
     };
 
     fetch('/signup', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify(userData)
+        body: new URLSearchParams(userData)
     }).then(response => {
         if (response.ok) {
             window.location.href = './login.html'; // Redirect to login page
@@ -168,7 +168,7 @@ function handleSignup(event) {
             alert('Signup failed. Please try again.');
         }
     });
-}
+});
 
 // Function to handle user login
 function handleLogin(event) {
