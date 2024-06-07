@@ -120,7 +120,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-//auth.js
+// auth.js
+
 document.addEventListener('DOMContentLoaded', function() {
     const signupForm = document.getElementById('signupForm');
     if (signupForm) {
@@ -191,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: new URLSearchParams(userData)
         }).then(response => {
             if (response.ok) {
-                window.location.href = './features.html'; // Redirect to features page
+                window.location.href = '/features'; // Redirect to features page
             } else {
                 alert('Signup failed. Please try again.');
             }
@@ -211,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify({ email, password })
         }).then(response => {
             if (response.ok) {
-                window.location.href = './features.html'; // Redirect to features page
+                window.location.href = '/features'; // Redirect to features page
             } else {
                 alert('Login failed: Invalid email or password');
             }
@@ -224,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST'
         }).then(response => {
             if (response.ok) {
-                window.location.href = './index.html'; // Redirect to the home page
+                window.location.href = '/'; // Redirect to the home page
             }
         });
     }
@@ -247,20 +248,21 @@ function showNotification(message) {
     }
 }
 
-// Adding event listener for the notify button
+// Function to clear local storage
+function clearLocalStorage() {
+    localStorage.clear();
+    alert('All data cleared!');
+    window.location.reload();
+}
+
+// Add event listeners on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Adding event listener for the notify button
     const notifyButton = document.getElementById('notifyButton');
     if (notifyButton) {
         notifyButton.addEventListener('click', function() {
             showNotification('Time to drink water!');
         });
-    }
-
-    // Function to clear local storage
-    function clearLocalStorage() {
-        localStorage.clear();
-        alert('All data cleared!');
-        window.location.reload();
     }
 
     // Adding event listener for the clear data button
