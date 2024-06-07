@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-/document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
     const signupForm = document.getElementById('signupForm');
     if (signupForm) {
         signupForm.addEventListener('submit', function(event) {
@@ -419,6 +419,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }).catch(error => {
             console.error('Logout failed:', error);
             alert('Logout failed. Please try again.');
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const navToggle = document.getElementById('navToggle');
+    const navList = document.getElementById('navList');
+
+    if (navToggle && navList) {
+        navToggle.addEventListener('click', function() {
+            navList.classList.toggle('active');
         });
     }
 });
