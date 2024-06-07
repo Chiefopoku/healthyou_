@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
             birthday: document.getElementById('birthday').value,
             sex: document.getElementById('sex').value
         };
-
+    
         fetch('/signup', {
             method: 'POST',
             headers: {
@@ -371,23 +371,19 @@ document.addEventListener('DOMContentLoaded', function() {
             body: new URLSearchParams(userData)
         }).then(response => {
             if (response.ok) {
-                window.location.href = './login.html'; // Redirect to login page
+                window.location.href = './features.html'; // Redirect to features page
             } else {
-                response.json().then(data => {
-                    alert('Signup failed: ' + data.message);
-                });
+                alert('Signup failed. Please try again.');
             }
-        }).catch(error => {
-            console.error('Signup failed:', error);
-            alert('Signup failed. Please try again.');
         });
     }
+
 
     function handleLogin(event) {
         event.preventDefault();
         const email = event.target.elements['email'].value;
         const password = event.target.elements['password'].value;
-
+    
         fetch('/login', {
             method: 'POST',
             headers: {
@@ -398,13 +394,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 window.location.href = './features.html'; // Redirect to features page
             } else {
-                response.json().then(data => {
-                    alert('Login failed: ' + data.message);
-                });
+                alert('Login failed: Invalid email or password');
             }
-        }).catch(error => {
-            console.error('Login failed:', error);
-            alert('Login failed. Please try again.');
         });
     }
 
