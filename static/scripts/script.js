@@ -43,6 +43,10 @@ function changeHealthTip() {
 // Set an interval to change the health tip every 10 seconds
 setInterval(changeHealthTip, 10000);
 
+// Invoke changeHealthTip on page load
+document.addEventListener('DOMContentLoaded', changeHealthTip);
+
+
 // Function to handle reminder form submission
 function handleReminderForm(event) {
     event.preventDefault();
@@ -51,7 +55,7 @@ function handleReminderForm(event) {
     const interval = document.getElementById('interval').value;
 
     const reminder = { reminderType, interval };
-    
+
     fetch('/set_reminder', {
         method: 'POST',
         headers: {
@@ -107,13 +111,16 @@ function loadReminders() {
         });
 }
 
-// Signup form validation and handling
-document.getElementById('signupForm').addEventListener('submit', function(event) {
-    if (!validateForm(event.target)) {
-        event.preventDefault();
+// Invoke loadReminders on page load if reminder form exists
+document.addEventListener('DOMContentLoaded', function() {
+    const reminderForm = document.getElementById('reminder-form');
+    if (reminderForm) {
+        reminderForm.addEventListener('submit', handleReminderForm);
+        loadReminders();
     }
 });
 
+// Function to validate signup form
 function validateForm(form) {
     let isValid = true;
     const email = form.elements['email'];
@@ -144,34 +151,40 @@ function validateForm(form) {
     return isValid;
 }
 
-document.getElementById('signupForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const userData = {
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        password: document.getElementById('password').value,
-        passwordVerify: document.getElementById('passwordVerify').value,
-        birthday: document.getElementById('birthday').value,
-        sex: document.getElementById('sex').value
-    };
 
-    fetch('/signup', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams(userData)
-    }).then(response => {
-        if (response.ok) {
-            window.location.href = './login.html'; // Redirect to login page
-        } else {
-            alert('Signup failed. Please try again.');
-        }
-    });
+// Function to handle user signup
+document.getElementById('signupForm').addEventListener('submit', function(event) {
+    if (!validateForm(event.target)) {
+        event.preventDefault();
+    } else {
+        event.preventDefault();
+        const userData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            passwordVerify: document.getElementById('passwordVerify').value,
+            birthday: document.getElementById('birthday').value,
+            sex: document.getElementById('sex').value
+        };
+
+        fetch('/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(userData)
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = './login.html'; // Redirect to login page
+            } else {
+                alert('Signup failed. Please try again.');
+            }
+        });
+    }
 });
 
 // Function to handle user login
-function handleLogin(event) {
+document.getElementById('loginForm').addEventListener('submit', function(event) {
     event.preventDefault();
     const email = event.target.elements['email'].value;
     const password = event.target.elements['password'].value;
@@ -189,7 +202,7 @@ function handleLogin(event) {
             alert('Login failed: Invalid email or password');
         }
     });
-}
+});
 
 // Function to handle user logout
 function handleLogout(event) {
@@ -211,58 +224,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Invoke initial functions on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const navToggle = document.querySelector('.nav-toggle');
-    const navList = document.querySelector('.nav-list');
-    const reminderForm = document.getElementById('reminder-form');
-    const signupForm = document.getElementById('signupForm');
-    const loginForm = document.getElementById('loginForm');
-    const logoutButton = document.getElementById('logout');
-    const userNameDisplay = document.getElementById('userName');
-
-    if (navToggle && navList) {
-        navToggle.addEventListener('click', function() {
-            navList.classList.toggle('active');
-        });
-    }
-
-    changeHealthTip(); // Immediately change the health tip when the page loads
-    setInterval(changeHealthTip, 10000); // Change health tip every 10 seconds
-
-    if (reminderForm) {
-        reminderForm.addEventListener('submit', handleReminderForm);
-        loadReminders(); // Load reminders from the server
-    }
-
-    if (signupForm) {
-        signupForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            if (validateForm(signupForm)) {
-                handleSignup(event);
-            }
-        });
-    }
-
-
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-    }
-
-    if (logoutButton) {
-        logoutButton.addEventListener('click', handleLogout);
-    }
-
-    if (userNameDisplay) {
-        const user = JSON.parse(localStorage.getItem('currentUser'));
-        if (user) {
-            userNameDisplay.textContent = user.name;
-        } else {
-            window.location.href = './login.html';
-        }
-    }
-});
-
 
 // Function to show browser notifications
 function showNotification(message) {
@@ -280,22 +241,24 @@ function showNotification(message) {
 }
 
 // Adding event listener for the notify button
-const notifyButton = document.getElementById('notifyButton');
-if (notifyButton) {
-    notifyButton.addEventListener('click', function() {
-        showNotification('Time to drink water!');
-    });
-}
+document.addEventListener('DOMContentLoaded', function() {
+    const notifyButton = document.getElementById('notifyButton');
+    if (notifyButton) {
+        notifyButton.addEventListener('click', function() {
+            showNotification('Time to drink water!');
+        });
+    }
 
-// Function to clear local storage
-function clearLocalStorage() {
-    localStorage.clear();
-    alert('All data cleared!');
-    window.location.reload();
-}
+    // Function to clear local storage
+    function clearLocalStorage() {
+        localStorage.clear();
+        alert('All data cleared!');
+        window.location.reload();
+    }
 
-// Adding event listener for the clear data button
-const clearDataButton = document.getElementById('clearDataButton');
-if (clearDataButton) {
-    clearDataButton.addEventListener('click', clearLocalStorage);
-}
+    // Adding event listener for the clear data button
+    const clearDataButton = document.getElementById('clearDataButton');
+    if (clearDataButton) {
+        clearDataButton.addEventListener('click', clearLocalStorage);
+    }
+});
