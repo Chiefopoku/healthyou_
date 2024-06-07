@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HealthYou</title>
-    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <header>
-        <div class="logo"><a href="./index.html">HealthYou</a></div>
+        <div class="logo"><a href="{{ url_for('index') }}">HealthYou</a></div>
         <nav class="nav">
             <div class="nav-toggle">
                 <div class="nav-toggle-bar"></div>
@@ -17,9 +17,9 @@
                 <div class="nav-toggle-bar"></div>
             </div>
             <ul class="nav-list">
-                <li><a href="./index.html">Home</a></li>
-                <li><a href="./features.html">Features</a></li>
-                <li><a href="./account.html">Account</a></li>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('features') }}">Features</a></li>
+                <li><a href="{{ url_for('account') }}">Account</a></li>
             </ul>
         </nav>
     </header>
@@ -39,7 +39,7 @@
         <section class="team">
             <h2>Meet the Team</h2>
             <div class="team-member">
-                <img src="path/to/your/team-member1.jpg" alt="Emmanuel Opoku-Adjei">
+                <img src="{{ url_for('static', filename='images/team-member1.jpg') }}" alt="Emmanuel Opoku-Adjei">
                 <h3>Emmanuel Opoku-Adjei</h3>
                 <p>Front-end Developer, Back-end Developer, and QA Engineer</p>
                 <ul>
@@ -71,7 +71,7 @@
         <div class="main-container">
             <section class="contact" id="contact">
                 <h2>Contact Us</h2>
-                <form id="contactForm">
+                <form id="contactForm" method="POST" action="{{ url_for('contact') }}">
                     <div class="form-group">
                         <label for="contactName">Name:</label>
                         <input type="text" id="contactName" name="contactName" required>
@@ -97,18 +97,18 @@
 
     <footer>
         <ul>
-            <li><a href="./index.html">Home</a></li>
-            <li><a href="./features.html">Features</a></li>
-            <li><a href="./about.html">About</a></li>
-            <li><a href="./account.html">Account</a></li>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('features') }}">Features</a></li>
+            <li><a href="{{ url_for('about') }}">About</a></li>
+            <li><a href="{{ url_for('account') }}">Account</a></li>
         </ul>
         <div>
-            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="Assets/icons/facebook.png" height="30" alt="Facebook Icon"></a>
-            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="Assets/icons/twitter.png" height="30" alt="Twitter Icon"></a>
-            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="Assets/icons/instagram.png" height="30" alt="Instagram Icon"></a>
+            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="{{ url_for('static', filename='icons/facebook.png') }}" height="30" alt="Facebook Icon"></a>
+            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="{{ url_for('static', filename='icons/twitter.png') }}" height="30" alt="Twitter Icon"></a>
+            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="{{ url_for('static', filename='icons/instagram.png') }}" height="30" alt="Instagram Icon"></a>
         </div>
         <p>Contact us: healthyou@gmail.com | (+233) 2454-86439</p>
     </footer>
-    <script src="scripts/script.js"></script>
+    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </body>
 </html>

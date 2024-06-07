@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HealthYou</title>
-    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
 </head>
 <body>
     <header>
-        <div class="logo"><a href="./index.html">HealthYou</a></div>
+        <div class="logo"><a href="{{ url_for('index') }}">HealthYou</a></div>
         <nav class="nav">
             <div class="nav-toggle">
                 <div class="nav-toggle-bar"></div>
@@ -16,9 +16,9 @@
                 <div class="nav-toggle-bar"></div>
             </div>
             <ul class="nav-list">
-                <li><a href="./index.html">Home</a></li>
-                <li><a href="./features.html">Features</a></li>
-                <li><a href="./login.html">Login</a></li>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('features') }}">Features</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
             </ul>
         </nav>
     </header>
@@ -31,7 +31,7 @@
         </section>
         <section class="reminder-setup-section">
             <h2>Set Your Reminders</h2>
-            <form id="reminder-form">
+            <form id="reminder-form" action="{{ url_for('set_reminder') }}" method="post">
                 <div class="form-group">
                     <label for="reminder-type">Type of Reminder:</label>
                     <select id="reminder-type" name="reminder-type" required>
@@ -93,14 +93,14 @@
 
     <footer>
         <ul>
-            <li><a href="./index.html">Home</a></li>
-            <li><a href="./features.html">Features</a></li>
-            <li><a href="./login.html">Login</a></li>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('features') }}">Features</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
         </ul>
         <div>
-            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="Assets/icons/facebook.png" height="30" alt="Facebook Icon"></a>
-            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="Assets/icons/twitter.png" height="30" alt="Twitter Icon"></a>
-            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="Assets/icons/instagram.png" height="30" alt="Instagram Icon"></a>
+            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="{{ url_for('static', filename='icons/facebook.png') }}" height="30" alt="Facebook Icon"></a>
+            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="{{ url_for('static', filename='icons/twitter.png') }}" height="30" alt="Twitter Icon"></a>
+            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="{{ url_for('static', filename='icons/instagram.png') }}" height="30" alt="Instagram Icon"></a>
         </div>
         <p>Contact us: healthyou@gmail.com | (+233) 2454-86439</p>
     </footer>
@@ -130,6 +130,6 @@
             }
         });
     </script>
-    <script src="scripts/script.js"></script>
+    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </body>
 </html>

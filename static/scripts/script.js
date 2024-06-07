@@ -50,13 +50,20 @@ function handleReminderForm(event) {
     const reminderType = document.getElementById('reminder-type').value;
     const interval = document.getElementById('interval').value;
 
-    const reminders = JSON.parse(localStorage.getItem('reminders')) || [];
-    const newReminder = { type: reminderType, interval: interval };
-    reminders.push(newReminder);
-    localStorage.setItem('reminders', JSON.stringify(reminders));
-
-    displayReminder(newReminder);
-    document.getElementById('reminder-form').reset(); // Reset form fields
+    const reminder = { reminderType, interval };
+    
+    fetch('/set_reminder', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams(reminder)
+    }).then(response => {
+        if (response.ok) {
+            loadReminders();
+            document.getElementById('reminder-form').reset(); // Reset form fields
+        }
+    });
 }
 
 // Function to display reminders on the page
@@ -66,10 +73,9 @@ function displayReminder(reminder) {
         const reminderItem = document.createElement('div');
         reminderItem.className = 'reminder-item';
         reminderItem.innerHTML = `
-            <strong>Reminder:</strong> ${reminder.type} <br> 
+            <strong>Reminder:</strong> ${reminder.reminder_type} <br> 
             <strong>Interval:</strong> ${reminder.interval}
-            <button onclick="markReminderAsCompleted(this)" class="btn">Mark as Completed</button>
-            <button onclick="deleteReminder(this)" class="btn">Delete</button>
+            <button onclick="deleteReminder('${reminder._id}')" class="btn">Delete</button>
         `;
         reminderList.appendChild(reminderItem);
     } else {
@@ -77,72 +83,37 @@ function displayReminder(reminder) {
     }
 }
 
-// Function to mark reminder as completed
-function markReminderAsCompleted(button) {
-    const reminderItem = button.parentElement;
-    reminderItem.classList.add('completed');
-    button.remove(); // Remove the 'Mark as Completed' button after marking it as completed
-}
-
 // Function to delete reminder
-function deleteReminder(button) {
-    const reminderItem = button.parentElement;
-    const reminderType = reminderItem.querySelector('strong').innerText.split(': ')[1];
-    reminderItem.remove();
-
-    // Update the reminders in localStorage
-    let reminders = JSON.parse(localStorage.getItem('reminders')) || [];
-    reminders = reminders.filter(reminder => reminder.type !== reminderType);
-    localStorage.setItem('reminders', JSON.stringify(reminders));
-}
-
-// Example usage during fetch
-document.addEventListener('DOMContentLoaded', function() {
-    const reminderForm = document.getElementById('reminder-form');
-    if (reminderForm) {
-        reminderForm.addEventListener('submit', handleReminderForm);
-    }
-
-    // Load and display existing reminders
-    loadReminders();
-});
-
-// Function to load and display reminders from localStorage
-function loadReminders() {
-    const reminders = JSON.parse(localStorage.getItem('reminders')) || [];
-    reminders.forEach(reminder => {
-        displayReminder(reminder);
+function deleteReminder(reminderId) {
+    fetch(`/delete_reminder/${reminderId}`, {
+        method: 'DELETE'
+    }).then(response => {
+        if (response.ok) {
+            loadReminders();
+        }
     });
 }
 
-// Example of pre-existing reminders fetched from an API
-fetch('/api/reminders')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        const reminders = JSON.parse(localStorage.getItem('reminders')) || [];
-        const reminderList = document.querySelector('.reminder-list');
-        
-        if (reminderList) {
-            data.reminders.forEach(reminder => {
-                // Check if the reminder already exists in localStorage
-                const exists = reminders.some(localReminder => localReminder.type === reminder.type && localReminder.interval === reminder.interval);
-                if (!exists) {
-                    reminders.push(reminder);
-                    displayReminder(reminder);
-                }
+// Function to load and display reminders from the server
+function loadReminders() {
+    fetch('/get_reminders')
+        .then(response => response.json())
+        .then(reminders => {
+            const reminderList = document.querySelector('.reminder-list');
+            reminderList.innerHTML = ''; // Clear the list first
+            reminders.forEach(reminder => {
+                displayReminder(reminder);
             });
-            // Update localStorage with new reminders
-            localStorage.setItem('reminders', JSON.stringify(reminders));
-        }
-    })
-    .catch(error => console.error('There was a problem with the fetch operation:', error));
+        });
+}
 
-// Function to validate form fields
+// Signup form validation and handling
+document.getElementById('signupForm').addEventListener('submit', function(event) {
+    if (!validateForm(event.target)) {
+        event.preventDefault();
+    }
+});
+
 function validateForm(form) {
     let isValid = true;
     const email = form.elements['email'];
@@ -163,13 +134,11 @@ function validateForm(form) {
         password.setCustomValidity('');
     }
 
-    if (passwordVerify) {
-        if (password.value !== passwordVerify.value) {
-            isValid = false;
-            passwordVerify.setCustomValidity('Passwords do not match.');
-        } else {
-            passwordVerify.setCustomValidity('');
-        }
+    if (password.value !== passwordVerify.value) {
+        isValid = false;
+        passwordVerify.setCustomValidity('Passwords do not match.');
+    } else {
+        passwordVerify.setCustomValidity('');
     }
 
     return isValid;
@@ -186,12 +155,19 @@ function handleSignup(event) {
         sex: event.target.elements['sex'].value
     };
 
-    let users = JSON.parse(localStorage.getItem('users')) || [];
-    users.push(userData);
-    localStorage.setItem('users', JSON.stringify(users));
-
-    localStorage.setItem('currentUser', JSON.stringify(userData));
-    window.location.href = './features.html'; // Redirect to features page
+    fetch('/signup', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+    }).then(response => {
+        if (response.ok) {
+            window.location.href = './login.html'; // Redirect to login page
+        } else {
+            alert('Signup failed. Please try again.');
+        }
+    });
 }
 
 // Function to handle user login
@@ -200,21 +176,31 @@ function handleLogin(event) {
     const email = event.target.elements['email'].value;
     const password = event.target.elements['password'].value;
 
-    let users = JSON.parse(localStorage.getItem('users')) || [];
-    const user = users.find(user => user.email === email && user.password === password);
-    if (user) {
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        window.location.href = './features.html'; // Redirect to features page
-    } else {
-        alert('Login failed: Invalid email or password');
-    }
+    fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+    }).then(response => {
+        if (response.ok) {
+            window.location.href = './features.html'; // Redirect to features page
+        } else {
+            alert('Login failed: Invalid email or password');
+        }
+    });
 }
 
 // Function to handle user logout
 function handleLogout(event) {
     event.preventDefault(); // Prevent form from submitting
-    localStorage.removeItem('currentUser'); // Remove user data from localStorage
-    window.location.href = './index.html'; // Redirect to the home page
+    fetch('/logout', {
+        method: 'POST'
+    }).then(response => {
+        if (response.ok) {
+            window.location.href = './index.html'; // Redirect to the home page
+        }
+    });
 }
 
 // Add event listener to the logout form
@@ -224,16 +210,6 @@ document.addEventListener('DOMContentLoaded', function() {
         logoutForm.addEventListener('submit', handleLogout);
     }
 });
-
-//Invoke initial functions on page load
-document.addEventListener(‘DOMContentLoaded’, function() {
-    const navToggle = document.querySelector(’.nav-toggle’);
-    const navList = document.querySelector(’.nav-list’);
-    const reminderForm = document.getElementById(‘reminder-form’);
-    const signupForm = document.getElementById(‘signupForm’);
-    const loginForm = document.getElementById(‘loginForm’);
-    const logoutButton = document.getElementById(‘logout’);
-    const userNameDisplay = document.getElementById(‘userName’);
 
 // Invoke initial functions on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -245,18 +221,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoutButton = document.getElementById('logout');
     const userNameDisplay = document.getElementById('userName');
 
-   if (navToggle && navList) {
-    navToggle.addEventListener('click', function() {
-        navList.classList.toggle('active');
-    });
+    if (navToggle && navList) {
+        navToggle.addEventListener('click', function() {
+            navList.classList.toggle('active');
+        });
     }
+
     changeHealthTip(); // Immediately change the health tip when the page loads
     setInterval(changeHealthTip, 10000); // Change health tip every 10 seconds
 
     if (reminderForm) {
         reminderForm.addEventListener('submit', handleReminderForm);
-        const reminders = JSON.parse(localStorage.getItem('reminders')) || [];
-        reminders.forEach(displayReminder);
+        loadReminders(); // Load reminders from the server
     }
 
     if (signupForm) {
@@ -267,6 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
 
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
@@ -287,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-//notification setting for in- browser
+// Function to show browser notifications
 function showNotification(message) {
     if (Notification.permission === 'granted') {
         new Notification(message);
@@ -296,18 +273,29 @@ function showNotification(message) {
             if (permission === 'granted') {
                 new Notification(message);
             }
+        }).catch(error => {
+            console.error('Notification permission request failed:', error);
         });
     }
 }
 
-document.getElementById('notifyButton').addEventListener('click', function() {
-    showNotification('Time to drink water!');
-});
+// Adding event listener for the notify button
+const notifyButton = document.getElementById('notifyButton');
+if (notifyButton) {
+    notifyButton.addEventListener('click', function() {
+        showNotification('Time to drink water!');
+    });
+}
 
+// Function to clear local storage
 function clearLocalStorage() {
     localStorage.clear();
     alert('All data cleared!');
     window.location.reload();
 }
 
-document.getElementById('clearDataButton').addEventListener('click', clearLocalStorage);
+// Adding event listener for the clear data button
+const clearDataButton = document.getElementById('clearDataButton');
+if (clearDataButton) {
+    clearDataButton.addEventListener('click', clearLocalStorage);
+}
