@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
             birthday: document.getElementById('birthday').value,
             sex: document.getElementById('sex').value
         };
-
+    
         fetch('/signup', {
             method: 'POST',
             headers: {
@@ -194,8 +194,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 window.location.href = '/features'; // Redirect to features page
             } else {
-                alert('Signup failed. Please try again.');
+                response.json().then(data => {
+                    alert(`Signup failed: ${data.message}`);
+                });
             }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('Signup failed. Please try again.');
         });
     }
 

@@ -7,9 +7,7 @@ app.secret_key = 'your_secret_key'  # Replace with a real secret key
 
 # Configure SQLite database
 basedir = os.path.abspath(os.path.dirname(__file__))
-db_path = os.path.join(basedir, 'healthyou.db')
-print(f"Database path: {db_path}")  # Debug print
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'healthyou.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -58,21 +56,18 @@ def signup():
         sex = request.form['sex']
 
         if password != password_verify:
-            flash('Passwords do not match!', 'error')
-            return redirect(url_for('signup'))
+            return jsonify({"message": "Passwords do not match!"}), 400
 
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
-            flash('Email already exists!', 'error')
-            return redirect(url_for('signup'))
+            return jsonify({"message": "Email already exists!"}), 400
 
         new_user = User(name=name, email=email, password=password, birthday=birthday, sex=sex)
         db.session.add(new_user)
         db.session.commit()
 
-        flash('Account created successfully!', 'success')
         session['user_id'] = new_user.id
-        return redirect(url_for('features'))
+        return jsonify({"message": "Account created successfully!"}), 200
 
     return render_template('signup.html')
 
@@ -85,12 +80,10 @@ def login():
         user = User.query.filter_by(email=email, password=password).first()
 
         if user:
-            flash('Login successful!', 'success')
             session['user_id'] = user.id
-            return redirect(url_for('features'))
+            return jsonify({"message": "Login successful!"}), 200
         else:
-            flash('Invalid credentials!', 'error')
-            return redirect(url_for('login'))
+            return jsonify({"message": "Invalid credentials!"}), 401
 
     return render_template('login.html')
 
@@ -108,8 +101,7 @@ def about():
 @app.route('/set_reminder', methods=['POST'])
 def set_reminder():
     if 'user_id' not in session:
-        flash('Please log in to set a reminder', 'error')
-        return redirect(url_for('login'))
+        return jsonify({"message": "Please log in to set a reminder"}), 403
 
     reminder_type = request.form['reminder-type']
     interval = request.form['interval']
@@ -119,8 +111,7 @@ def set_reminder():
     db.session.add(new_reminder)
     db.session.commit()
 
-    flash('Reminder set successfully!', 'success')
-    return redirect(url_for('features'))
+    return jsonify({"message": "Reminder set successfully!"}), 200
 
 @app.route('/contact', methods=['POST'])
 def contact():
@@ -132,8 +123,7 @@ def contact():
     db.session.add(new_contact)
     db.session.commit()
 
-    flash('Message sent successfully!', 'success')
-    return redirect(url_for('about'))
+    return jsonify({"message": "Message sent successfully!"}), 200
 
 @app.route('/get_reminders')
 def get_reminders():
@@ -146,6 +136,24 @@ def get_reminders():
         'reminder_type': reminder.reminder_type,
         'interval': reminder.interval
     } for reminder in reminders])
+
+@app.route('/delete_reminder/<int:reminder_id>', methods=['DELETE'])
+def delete_reminder(reminder_id):
+    if 'user_id' not in session:
+        return jsonify({"message": "Not authorized"}), 403
+
+    reminder = Reminder.query.get(reminder_id)
+    if reminder:
+        db.session.delete(reminder)
+        db.session.commit()
+        return jsonify({"message": "Reminder deleted successfully!"}), 200
+    else:
+        return jsonify({"message": "Reminder not found"}), 404
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user_id', None)
+    return jsonify({"message": "Logged out successfully!"}), 200
 
 if __name__ == '__main__':
     db.create_all()  # Create tables if they don't exist
