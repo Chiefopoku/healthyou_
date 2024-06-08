@@ -145,51 +145,23 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: new URLSearchParams(userData)
         }).then(response => {
-            if (response.ok) {
-                window.location.href = '/features'; // Redirect to features page
-            } else {
-                response.json().then(data => {
-                    alert(`Signup failed: ${data.message}`);
+            if (response.headers.get('content-type') && response.headers.get('content-type').includes('application/json')) {
+                return response.json().then(data => {
+                    if (response.ok) {
+                        window.location.href = '/features'; // Redirect to features page
+                    } else {
+                        alert(`Signup failed: ${data.message}`);
+                    }
                 });
+            } else {
+                return response.text().then(text => { throw new Error(text) });
             }
         }).catch(error => {
             console.error('Error:', error);
             alert('Signup failed. Please try again.');
         });
     }
-
-    function handleLogin(event) {
-        event.preventDefault();
-        const email = event.target.elements['email'].value;
-        const password = event.target.elements['password'].value;
-
-        fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-        }).then(response => {
-            if (response.ok) {
-                window.location.href = '/features'; // Redirect to features page
-            } else {
-                alert('Login failed: Invalid email or password');
-            }
-        });
-    }
-
-    function handleLogout(event) {
-        event.preventDefault(); // Prevent form from submitting
-        fetch('/logout', {
-            method: 'POST'
-        }).then(response => {
-            if (response.ok) {
-                window.location.href = '/'; // Redirect to the home page
-            }
-        });
-    }
 });
-
 
 
 // notifications.js
