@@ -120,7 +120,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// auth.js
+
+//auth.js
 
 document.addEventListener('DOMContentLoaded', function() {
     const signupForm = document.getElementById('signupForm');
