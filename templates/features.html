@@ -10,12 +10,12 @@
     <header>
         <div class="logo"><a href="{{ url_for('index') }}">HealthYou</a></div>
         <nav class="nav">
-            <div class="nav-toggle">
+            <div class="nav-toggle" id="navToggle" aria-expanded="false">
                 <div class="nav-toggle-bar"></div>
                 <div class="nav-toggle-bar"></div>
                 <div class="nav-toggle-bar"></div>
             </div>
-            <ul class="nav-list">
+            <ul class="nav-list" id="navList">
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('features') }}">Features</a></li>
                 <li><a href="{{ url_for('login') }}">Login</a></li>
@@ -31,7 +31,7 @@
         </section>
         <section class="reminder-setup-section">
             <h2>Set Your Reminders</h2>
-            <form id="reminder-form" action="{{ url_for('set_reminder') }}" method="post">
+            <form id="reminder-form" action="{{ url_for('features') }}" method="post">
                 <div class="form-group">
                     <label for="reminder-type">Type of Reminder:</label>
                     <select id="reminder-type" name="reminder-type" required>
