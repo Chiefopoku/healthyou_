@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = os.urandom(24)  # Secure random secret key
 
 # Configure SQLite database
 basedir = os.path.abspath(os.path.dirname(__file__))
