@@ -120,7 +120,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-
 //auth.js
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -157,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
             email.setCustomValidity('');
         }
 
-        if (password.value.length < 8) {
+        if (password.value.length <= 8) {
             isValid = false;
             password.setCustomValidity('Password must be at least 8 characters long.');
         } else {
@@ -231,6 +230,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+
 
 // notifications.js
 
