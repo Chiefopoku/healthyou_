@@ -9,9 +9,9 @@
 </head>
 <body>
     <header>
-        <div class="logo"><a href="{{ url_for('/') }}">HealthYou</a></div>
+        <div class="logo"><a href="{{ url_for('index') }}">HealthYou</a></div>
         <nav class="nav">
-            <div class="nav-toggle" id="navToggle">
+            <div class="nav-toggle" id="navToggle" aria-expanded="false">
                 <div class="nav-toggle-bar"></div>
                 <div class="nav-toggle-bar"></div>
                 <div class="nav-toggle-bar"></div>
@@ -29,7 +29,7 @@
             <h1>Account Settings</h1>
             <div class="profile-info">
                 <h2>Profile Information</h2>
-                <form id="profileForm" action="{{ url_for('update_profile') }}" method="post">
+                <form id="profileForm" action="{{ url_for('update_profile') }}" method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="name">Name:</label>
                         <input type="text" id="name" name="name" value="{{ user.name }}" required>
@@ -48,6 +48,10 @@
                             <option value="male" {% if user.sex == 'male' %}selected{% endif %}>Male</option>
                             <option value="female" {% if user.sex == 'female' %}selected{% endif %}>Female</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePicture">Profile Picture:</label>
+                        <input type="file" id="profilePicture" name="profilePicture" accept="image/*">
                     </div>
                     <button type="submit" class="btn">Update Profile</button>
                 </form>
@@ -103,7 +107,9 @@
     <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
     <script>
         document.getElementById('navToggle').addEventListener('click', function() {
-            document.getElementById('navList').classList.toggle('active');
+            const navList = document.getElementById('navList');
+            const expanded = navList.classList.toggle('active');
+            this.setAttribute('aria-expanded', expanded);
         });
 
         function exportData() {

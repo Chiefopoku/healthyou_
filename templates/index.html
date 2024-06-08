@@ -5,17 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HealthYou</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <meta name="description" content="HealthYou is your health companion to simplify daily health routines with personalized reminders and tips.">
+    <meta name="keywords" content="health, reminders, daily routines, hydration, exercise, healthy eating">
 </head>
 <body>
     <header>
         <div class="logo"><a href="{{ url_for('index') }}">HealthYou</a></div>
         <nav class="nav">
-            <div class="nav-toggle">
+            <div class="nav-toggle" id="navToggle" aria-expanded="false">
                 <div class="nav-toggle-bar"></div>
                 <div class="nav-toggle-bar"></div>
                 <div class="nav-toggle-bar"></div>
             </div>
-            <ul class="nav-list">
+            <ul class="nav-list" id="navList">
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('features') }}">Features</a></li>
                 <li><a href="{{ url_for('about') }}">About</a></li>
@@ -33,22 +35,22 @@
         <h2>Features</h2>
         <div class="features">
             <div class="feature">
-                <img src="{{ url_for('static', filename='Assets/icons/bottle-of-water.png') }}" height="50px" alt="bottle water">
+                <img src="{{ url_for('static', filename='Assets/icons/bottle-of-water.png') }}" height="50px" alt="Daily Hydration Reminders Icon">
                 <h3>Daily Hydration Reminders</h3>
                 <p>Never forget to drink water with our timely reminders.</p>
             </div>
             <div class="feature">
-                <img src="{{ url_for('static', filename='Assets/icons/icons8-healthy-eating-64.png') }}" height="50px" alt="Fruits Icon">
+                <img src="{{ url_for('static', filename='Assets/icons/icons8-healthy-eating-64.png') }}" height="50px" alt="Healthy Eating Tips Icon">
                 <h3>Healthy Eating Tips</h3>
                 <p>Get daily tips on nutritious meals to keep you energized.</p>
             </div>
             <div class="feature">
-                <img src="{{ url_for('static', filename='Assets/icons/icons8-checklist-50.png') }}" height="50px" alt="Clock Icon">
+                <img src="{{ url_for('static', filename='Assets/icons/icons8-checklist-50.png') }}" height="50px" alt="Routine Tracking Icon">
                 <h3>Routine Tracking</h3>
                 <p>Track and manage your daily health routines easily.</p>
             </div>
             <div class="feature">
-                <img src="{{ url_for('static', filename='Assets/icons/icons8-woman-athlete-48.png') }}" alt="Fitness Icon">
+                <img src="{{ url_for('static', filename='Assets/icons/icons8-woman-athlete-48.png') }}" height="50px" alt="Exercise Reminders Icon">
                 <h3>Exercise Reminders</h3>
                 <p>Stay active with customized workout reminders.</p>
             </div>
@@ -77,19 +79,19 @@
         <h2>What Our Users Say</h2>
         <div class="testimonials">
             <div class="testimonial">
-                <img src="{{ url_for('static', filename='Assets/icons/icons8-testimony-64.png') }}" alt="User Photo">
+                <img src="{{ url_for('static', filename='Assets/icons/icons8-testimony-64.png') }}" alt="Testimonial User Photo">
                 <p>"HealthYou has helped me stay consistent with my health routines. Highly recommended!" - John Doe</p>
             </div>
             <div class="testimonial">
-                <img src="{{ url_for('static', filename='Assets/icons/icons8-testimony-64.png') }}" alt="User Photo">
+                <img src="{{ url_for('static', filename='Assets/icons/icons8-testimony-64.png') }}" alt="Testimonial User Photo">
                 <p>"The reminders are a game-changer. I feel healthier and more organized." - Jane Smith</p>
             </div>
             <div class="testimonial">
-                <img src="{{ url_for('static', filename='Assets/icons/icons8-testimony-64.png') }}" alt="User Photo">
+                <img src="{{ url_for('static', filename='Assets/icons/icons8-testimony-64.png') }}" alt="Testimonial User Photo">
                 <p>"Thanks to HealthYou, I never forget to take my vitamins anymore. It's been a great addition to my daily routine." - Alex Johnson</p>
             </div>
             <div class="testimonial">
-                <img src="{{ url_for('static', filename='Assets/icons/icons8-testimony-64.png') }}" alt="User Photo">
+                <img src="{{ url_for('static', filename='Assets/icons/icons8-testimony-64.png') }}" alt="Testimonial User Photo">
                 <p>"The exercise reminders are fantastic. They help me stay active throughout the day." - Maria Garcia</p>
             </div>
         </div>
@@ -115,6 +117,13 @@
         </div>
         <p>Contact us: healthyou@gmail.com | (+233) 2454-86439</p>
     </footer>
+    <script>
+        document.getElementById('navToggle').addEventListener('click', function() {
+            const navList = document.getElementById('navList');
+            const expanded = navList.classList.toggle('active');
+            this.setAttribute('aria-expanded', expanded);
+        });
+    </script>
     <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </body>
 </html>

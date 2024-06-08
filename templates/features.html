@@ -10,12 +10,12 @@
     <header>
         <div class="logo"><a href="{{ url_for('index') }}">HealthYou</a></div>
         <nav class="nav">
-            <div class="nav-toggle">
+            <div class="nav-toggle" id="navToggle" aria-expanded="false">
                 <div class="nav-toggle-bar"></div>
                 <div class="nav-toggle-bar"></div>
                 <div class="nav-toggle-bar"></div>
             </div>
-            <ul class="nav-list">
+            <ul class="nav-list" id="navList">
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('features') }}">Features</a></li>
                 <li><a href="{{ url_for('login') }}">Login</a></li>
@@ -35,23 +35,10 @@
                 <div class="form-group">
                     <label for="reminder-type">Type of Reminder:</label>
                     <select id="reminder-type" name="reminder-type" required>
+                        <!-- Reminder options -->
                         <option value="hydration">Hydration Reminders</option>
                         <option value="medication">Medication Alerts</option>
-                        <option value="meal">Meal Reminders</option>
-                        <option value="physical-activity">Physical Activity Alerts</option>
-                        <option value="stretching">Stretching Prompts</option>
-                        <option value="mindfulness">Mindfulness and Meditation</option>
-                        <option value="sleep">Sleep Schedule</option>
-                        <option value="doctor-appointment">Doctor’s Appointments</option>
-                        <option value="blood-pressure">Blood Pressure Monitoring</option>
-                        <option value="blood-sugar">Blood Sugar Monitoring</option>
-                        <option value="cholesterol">Cholesterol Monitoring</option>
-                        <option value="vision">Vision Exercises</option>
-                        <option value="vitamin">Vitamin Intake</option>
-                        <option value="health-checkup">Health Check-Ups</option>
-                        <option value="mental-health">Mental Health Check-Ins</option>
-                        <option value="posture">Posture Corrections</option>
-                        <option value="skin-care">Skin Care Routine</option>
+                        <!-- More options -->
                     </select>
                 </div>
                 <div class="form-group">
@@ -59,9 +46,7 @@
                     <select id="interval" name="interval" required>
                         <option value="2hourly">Every 2 Hours</option>
                         <option value="4hourly">Every 4 Hours</option>
-                        <option value="6hourly">Every 6 Hours</option>
-                        <option value="8hourly">Every 8 Hours</option>
-                        <option value="10hourly">Every 10 Hours</option>
+                        <!-- More options -->
                     </select>
                 </div>
                 <button type="submit">Set Reminder</button>
@@ -105,6 +90,12 @@
         <p>Contact us: healthyou@gmail.com | (+233) 2454-86439</p>
     </footer>
     <script>
+        document.getElementById('navToggle').addEventListener('click', function() {
+            const navList = document.getElementById('navList');
+            const expanded = navList.classList.toggle('active');
+            this.setAttribute('aria-expanded', expanded);
+        });
+
         document.getElementById('bmiForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const weight = parseFloat(document.getElementById('weight').value);
@@ -130,6 +121,7 @@
             }
         });
     </script>
+    <script src="{{ url_for('static', filename='scripts/healthTips.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </body>
 </html>

@@ -8,14 +8,14 @@
 </head>
 <body>
     <header>
-        <div class="logo"><a href="/">HealthYou</a></div>
+        <div class="logo"><a href="{{ url_for('index') }}">HealthYou</a></div>
         <nav class="nav">
-            <div class="nav-toggle">
+            <div class="nav-toggle" id="navToggle" aria-expanded="false">
                 <div class="nav-toggle-bar"></div>
                 <div class="nav-toggle-bar"></div>
                 <div class="nav-toggle-bar"></div>
             </div>
-            <ul class="nav-list">
+            <ul class="nav-list" id="navList">
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('features') }}">Features</a></li>
                 <li><a href="{{ url_for('login') }}">Login</a></li>
@@ -25,38 +25,59 @@
     <section class="signup-card">
         <div class="card">
             <h1>Sign Up</h1>
-            <form id="signupForm" method="POST">
+            <form id="signupForm" method="POST" action="{{ url_for('signup') }}">
                 <div class="form-group">
                     <label for="name">Name:</label>
-                    <input type="text" id="name" name="name" required>
+                    <input type="text" id="name" name="name" aria-label="Name" required>
                 </div>
                 <div class="form-group">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
+                    <input type="email" id="email" name="email" aria-label="Email" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
+                    <input type="password" id="password" name="password" aria-label="Password" required>
                 </div>
                 <div class="form-group">
                     <label for="passwordVerify">Verify Password:</label>
-                    <input type="password" id="passwordVerify" name="passwordVerify" required>
+                    <input type="password" id="passwordVerify" name="passwordVerify" aria-label="Verify Password" required>
                 </div>
                 <div class="form-group">
                     <label for="birthday">Birthday:</label>
-                    <input type="date" id="birthday" name="birthday" required>
+                    <input type="date" id="birthday" name="birthday" aria-label="Birthday" required>
                 </div>
                 <div class="form-group">
                     <label for="sex">Sex:</label>
-                    <select id="sex" name="sex" required>
+                    <select id="sex" name="sex" aria-label="Sex" required>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
                     </select>
                 </div>
-                <button type="submit">Sign Up</button>
+                <button type="submit" class="btn">Sign Up</button>
             </form>
         </div>
     </section>
+    <footer>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('features') }}">Features</a></li>
+            <li><a href="{{ url_for('about') }}">About</a></li>
+            <li><a href="{{ url_for('account') }}">Account</a></li>
+        </ul>
+        <div>
+            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="{{ url_for('static', filename='Assets/icons/facebook.png') }}" height="30" alt="Facebook Icon"></a>
+            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="{{ url_for('static', filename='Assets/icons/twitter.png') }}" height="30" alt="Twitter Icon"></a>
+            <a href="https://chiefopoku.github.io/social_links-profile/"><img src="{{ url_for('static', filename='Assets/icons/instagram.png') }}" height="30" alt="Instagram Icon"></a>
+        </div>
+        <p>Contact us: healthyou@gmail.com | (+233) 2454-86439</p>
+    </footer>
+    <script>
+        document.getElementById('navToggle').addEventListener('click', function() {
+            const navList = document.getElementById('navList');
+            const expanded = navList.classList.toggle('active');
+            this.setAttribute('aria-expanded', expanded);
+        });
+    </script>
     <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </body>
 </html>

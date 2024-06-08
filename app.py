@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Replace with a real secret key
+app.secret_key = os.urandom(24)  # Secure random secret key
 
 # Configure SQLite database
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -62,7 +63,8 @@ def signup():
         if existing_user:
             return jsonify({"message": "Email already exists!"}), 400
 
-        new_user = User(name=name, email=email, password=password, birthday=birthday, sex=sex)
+        hashed_password = generate_password_hash(password, method='sha256')
+        new_user = User(name=name, email=email, password=hashed_password, birthday=birthday, sex=sex)
         db.session.add(new_user)
         db.session.commit()
 
@@ -77,9 +79,9 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        user = User.query.filter_by(email=email, password=password).first()
+        user = User.query.filter_by(email=email).first()
 
-        if user:
+        if user and check_password_hash(user.password, password):
             session['user_id'] = user.id
             return jsonify({"message": "Login successful!"}), 200
         else:
@@ -103,27 +105,21 @@ def set_reminder():
     if 'user_id' not in session:
         return jsonify({"message": "Please log in to set a reminder"}), 403
 
-    reminder_type = request.form['reminder-type']
-    interval = request.form['interval']
-    user_id = session['user_id']
+    reminder_type = request.form.get('reminder-type')
+    interval = request.form.get('interval')
+    user_id = session.get('user_id')
+
+    print(f"Reminder Type: {reminder_type}, Interval: {interval}, User ID: {user_id}")
+
+    if not reminder_type or not interval:
+        print("Invalid data received for reminder")
+        return jsonify({"message": "Invalid data!"}), 400
 
     new_reminder = Reminder(reminder_type=reminder_type, interval=interval, user_id=user_id)
     db.session.add(new_reminder)
     db.session.commit()
 
     return jsonify({"message": "Reminder set successfully!"}), 200
-
-@app.route('/contact', methods=['POST'])
-def contact():
-    name = request.form['contactName']
-    email = request.form['contactEmail']
-    message = request.form['contactMessage']
-
-    new_contact = Contact(name=name, email=email, message=message)
-    db.session.add(new_contact)
-    db.session.commit()
-
-    return jsonify({"message": "Message sent successfully!"}), 200
 
 @app.route('/get_reminders')
 def get_reminders():
@@ -149,6 +145,18 @@ def delete_reminder(reminder_id):
         return jsonify({"message": "Reminder deleted successfully!"}), 200
     else:
         return jsonify({"message": "Reminder not found"}), 404
+
+@app.route('/contact', methods=['POST'])
+def contact():
+    name = request.form['contactName']
+    email = request.form['contactEmail']
+    message = request.form['contactMessage']
+
+    new_contact = Contact(name=name, email=email, message=message)
+    db.session.add(new_contact)
+    db.session.commit()
+
+    return jsonify({"message": "Message sent successfully!"}), 200
 
 @app.route('/logout', methods=['POST'])
 def logout():
