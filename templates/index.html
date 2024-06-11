@@ -21,7 +21,6 @@
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('features') }}">Features</a></li>
                 <li><a href="{{ url_for('about') }}">About</a></li>
-                <li><a href="{{ url_for('account') }}">Account</a></li>
             </ul>
         </nav>
     </header>
@@ -103,12 +102,14 @@
         <a href="{{ url_for('signup') }}" class="btn">Sign Up Now</a>
     </section>
 
+
     <footer>
         <ul>
             <li><a href="{{ url_for('index') }}">Home</a></li>
             <li><a href="{{ url_for('features') }}">Features</a></li>
             <li><a href="{{ url_for('about') }}">About</a></li>
-            <li><a href="{{ url_for('account') }}">Account</a></li>
+            <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
         </ul>
         <div>
             <a href="https://chiefopoku.github.io/social_links-profile/"><img src="{{ url_for('static', filename='Assets/icons/facebook.png') }}" height="30" alt="Facebook Icon"></a>

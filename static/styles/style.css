@@ -638,9 +638,7 @@ button.btn:hover {
     padding: 20px;
 }
 
-.about {
-    justify-content: center;
-}
+
 /* Contact section styling */
 .contact {
     display: flex;
@@ -904,7 +902,7 @@ button.btn:hover {
 .bmi-calculator {
     text-align: center;
     padding: 40px 20px;
-    background-color: #F7F7F7;
+    background-color: #EEEEEE;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     max-width: 600px;
@@ -961,4 +959,98 @@ button.btn:hover {
     margin-top: 20px;
     font-size: 20px;
     color: #393E46;
+}
+
+
+.about {
+    justify-content: center;
+}
+
+.about, .mission {
+    padding: 50px 20px;
+    background-color: #EEEEEE; /* Light background color for contrast */
+    margin: 20px 0;
+    border-radius: 10px; /* Rounded corners for a modern look */
+    width: 100%;
+}
+
+.about h1, .mission h2 {
+    color: #333; /* Dark text color for readability */
+    font-size: 2.5em; /* Larger font size for headings */
+    text-align: center; /* Center-aligned text for headings */
+    margin-bottom: 20px;
+}
+
+.about p, .mission p {
+    color: #666; /* Medium gray text color */
+    font-size: 1.2em; /* Slightly larger font size for body text */
+    line-height: 1.6; /* Increased line height for better readability */
+    max-width: 800px; /* Limit text width for better readability */
+    margin: 0 auto 20px; /* Centered text with margin below */
+    text-align: center; /* Center-align text for a cohesive look */
+}
+
+.team-member {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.team-member img {
+    width: 150px; /* Smaller, consistent size for team member photos */
+    height: 150px; /* Make the photo square */
+    border-radius: 50%; /* Circular photos */
+    margin-bottom: 10px;
+}
+
+.team-member h3 {
+    color: #333; /* Dark text color for readability */
+    font-size: 1.5em; /* Slightly larger font size for names */
+}
+
+.team-member p {
+    color: #666; /* Medium gray text color */
+    font-size: 1.1em; /* Slightly larger font size for roles */
+    margin-bottom: 10px;
+}
+
+.team-member ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.team-member ul li a {
+    color: #007bff; /* Blue color for social icons */
+    font-size: 1.5em; /* Larger font size for icons */
+}
+
+.team-member ul li a:hover {
+    color: #0056b3; /* Darker blue on hover */
+}
+
+.faq {
+    display: flex;
+    flex-direction: column;
+    align-content: flex-end;
+    justify-content: center;
+    background-color: #EEEEEE; /* White background for FAQs */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    margin-bottom: 20px;
+    max-width: 100%;
+}
+
+.faq h3 {
+    color: #333; /* Dark text color for readability */
+    font-size: 1.5em; /* Slightly larger font size for questions */
+    margin-bottom: 10px;
+}
+
+.faq p {
+    color: #666; /* Medium gray text color */
+    font-size: 1.1em; /* Slightly larger font size for answers */
+    line-height: 1.5; /* Increased line height for better readability */
 }

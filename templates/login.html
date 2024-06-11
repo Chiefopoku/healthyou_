@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthYou</title>
+    <title>HealthYou - Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
 </head>
 <body>
@@ -28,8 +28,8 @@
             <h1>Login</h1>
             <form id="loginForm" method="POST" action="{{ url_for('login') }}">
                 <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" aria-label="Email" required>
+                    <label for="login_identity">Username or Email:</label>
+                    <input type="text" id="login_identity" name="login_identity" aria-label="Username or Email" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Password:</label>
@@ -45,7 +45,6 @@
             <li><a href="{{ url_for('index') }}">Home</a></li>
             <li><a href="{{ url_for('features') }}">Features</a></li>
             <li><a href="{{ url_for('about') }}">About</a></li>
-            <li><a href="{{ url_for('account') }}">Account</a></li>
         </ul>
         <div>
             <a href="https://chiefopoku.github.io/social_links-profile/"><img src="{{ url_for('static', filename='Assets/icons/facebook.png') }}" height="30" alt="Facebook Icon"></a>

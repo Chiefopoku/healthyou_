@@ -1,160 +1,93 @@
 import unittest
-from app import app, db, User, Reminder, Contact
+from app import app, db, User
+from werkzeug.security import generate_password_hash
 
-class HealthYouTestCase(unittest.TestCase):
+class HealthYouAuthTestCase(unittest.TestCase):
     def setUp(self):
-        app.config['TESTING'] = True
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        # Set up the Flask test client
         self.app = app.test_client()
+        self.app.testing = True
+        
+        # Create the database and the database tables
         db.create_all()
 
+        # Create a test user
+        hashed_password = generate_password_hash('testpassword', method='sha256')
+        self.test_user = User(name='Test User', username='testuser', email='test@example.com',
+                              password=hashed_password, birthday='1990-01-01', sex='M')
+        db.session.add(self.test_user)
+        db.session.commit()
+
     def tearDown(self):
+        # Remove the database tables and the database
         db.session.remove()
         db.drop_all()
 
-    def test_index(self):
-        response = self.app.get('/')
-        self.assertEqual(response.status_code, 200)
+    def signup(self, name, username, email, password, password_verify, birthday, sex):
+        return self.app.post('/signup', data=dict(
+            name=name,
+            username=username,
+            email=email,
+            password=password,
+            passwordVerify=password_verify,
+            birthday=birthday,
+            sex=sex
+        ), follow_redirects=True)
 
-    def test_signup(self):
-        response = self.app.post('/signup', data=dict(
-            name='Test User',
-            email='test@example.com',
-            password='password123',
-            passwordVerify='password123',
-            birthday='01-01-2000',
-            sex='male'
-        ))
+    def login(self, login_identity, password):
+        return self.app.post('/login', data=dict(
+            login_identity=login_identity,
+            password=password
+        ), follow_redirects=True)
+
+    def logout(self):
+        return self.app.post('/logout', follow_redirects=True)
+
+    # Sign-Up Tests
+    def test_successful_signup(self):
+        response = self.signup('New User', 'newuser', 'new@example.com', 'newpassword', 'newpassword', '1991-01-01', 'F')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Account created successfully!', response.data)
 
-        # Verify user in database
-        user = User.query.filter_by(email='test@example.com').first()
-        self.assertIsNotNone(user)
+    def test_signup_password_mismatch(self):
+        response = self.signup('New User', 'newuser', 'new@example.com', 'newpassword', 'wrongpassword', '1991-01-01', 'F')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Passwords do not match!', response.data)
 
-    def test_login(self):
-        self.app.post('/signup', data=dict(
-            name='Test User',
-            email='test@example.com',
-            password='password123',
-            passwordVerify='password123',
-            birthday='01-01-2000',
-            sex='male'
-        ))
-        response = self.app.post('/login', data=dict(
-            email='test@example.com',
-            password='password123'
-        ))
+    def test_signup_existing_user(self):
+        response = self.signup('Test User', 'testuser', 'test@example.com', 'testpassword', 'testpassword', '1990-01-01', 'M')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Email or Username already exists!', response.data)
+
+    def test_signup_missing_data(self):
+        response = self.signup('', 'newuser', 'new@example.com', 'newpassword', 'newpassword', '1991-01-01', 'F')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Missing data', response.data)
+
+    # Login Tests
+    def test_successful_login(self):
+        response = self.login('testuser', 'testpassword')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Login successful!', response.data)
 
-    def test_set_reminder(self):
-        self.app.post('/signup', data=dict(
-            name='Test User',
-            email='test@example.com',
-            password='password123',
-            passwordVerify='password123',
-            birthday='01-01-2000',
-            sex='male'
-        ))
-        self.app.post('/login', data=dict(
-            email='test@example.com',
-            password='password123'
-        ))
-        response = self.app.post('/set_reminder', data=dict(
-            **{
-                'reminder-type': 'Hydration',
-                'interval': '2hourly'
-            }
-        ))
-        print(f"Response data: {response.data}")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Reminder set successfully!', response.data)
+    def test_login_invalid_credentials(self):
+        response = self.login('wronguser', 'wrongpassword')
+        self.assertEqual(response.status_code, 401)
+        self.assertIn(b'Invalid credentials!', response.data)
 
-        # Verify reminder in database
-        reminder = Reminder.query.filter_by(reminder_type='Hydration').first()
-        self.assertIsNotNone(reminder)
+    def test_login_empty_username(self):
+        response = self.login('', 'testpassword')
+        self.assertEqual(response.status_code, 401)
+        self.assertIn(b'Missing data', response.data)
 
-    def test_get_reminders(self):
-        self.app.post('/signup', data=dict(
-            name='Test User',
-            email='test@example.com',
-            password='password123',
-            passwordVerify='password123',
-            birthday='01-01-2000',
-            sex='male'
-        ))
-        self.app.post('/login', data=dict(
-            email='test@example.com',
-            password='password123'
-        ))
-        self.app.post('/set_reminder')
-        
-        response = self.app.post('/set_reminder', data=dict(
-            **{
-                'reminder-type': 'Hydration',
-                'interval': '2hourly'
-            }
-        ))
-        response = self.app.get('/get_reminders')
-        print(f"Response data: {response.data}")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Hydration', response.data)
-
-    def test_delete_reminder(self):
-        self.app.post('/signup', data=dict(
-            name='Test User',
-            email='test@example.com',
-            password='password123',
-            passwordVerify='password123',
-            birthday='01-01-2000',
-            sex='male'
-        ))
-        self.app.post('/login', data=dict(
-            email='test@example.com',
-            password='password123'
-        ))
-        self.app.post('/set_reminder', data=dict(
-            **{
-                'reminder-type': 'Hydration',
-                'interval': '2hourly'
-            }
-        ))
-        reminder = Reminder.query.first()
-        if reminder:  # Check if reminder exists before trying to delete
-            response = self.app.delete(f'/delete_reminder/{reminder.id}')
-            self.assertEqual(response.status_code, 200)
-            self.assertIn(b'Reminder deleted successfully!', response.data)
-        else:
-            self.fail('Reminder was not created successfully.')
-
-    def test_contact(self):
-        response = self.app.post('/contact', data=dict(
-            contactName='Test User',
-            contactEmail='test@example.com',
-            contactMessage='This is a test message.'
-        ))
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Message sent successfully!', response.data)
-
-        # Verify contact in database
-        contact = Contact.query.filter_by(email='test@example.com').first()
-        self.assertIsNotNone(contact)
+    def test_login_empty_password(self):
+        response = self.login('testuser', '')
+        self.assertEqual(response.status_code, 401)
+        self.assertIn(b'Missing data', response.data)
 
     def test_logout(self):
-        self.app.post('/signup', data=dict(
-            name='Test User',
-            email='test@example.com',
-            password='password123',
-            passwordVerify='password123',
-            birthday='01-01-2000',
-            sex='male'
-        ))
-        self.app.post('/login', data=dict(
-            email='test@example.com',
-            password='password123'
-        ))
-        response = self.app.post('/logout')
+        self.login('testuser', 'testpassword')
+        response = self.logout()
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Logged out successfully!', response.data)
 

@@ -20,42 +20,19 @@ document.addEventListener('DOMContentLoaded', function() {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: new URLSearchParams(reminder)
+            body: new URLSearchParams(reminder).toString()
         }).then(response => {
             if (response.ok) {
                 loadReminders();
                 document.getElementById('reminder-form').reset(); // Reset form fields
             } else {
-                alert('Failed to set reminder. Please try again.');
+                response.json().then(data => {
+                    alert(`Failed to set reminder: ${data.message}`);
+                });
             }
-        });
-    }
-
-    function displayReminder(reminder) {
-        const reminderList = document.querySelector('.reminder-list');
-        if (reminderList) {
-            const reminderItem = document.createElement('div');
-            reminderItem.className = 'reminder-item';
-            reminderItem.innerHTML = `
-                <strong>Reminder:</strong> ${reminder.reminder_type} <br> 
-                <strong>Interval:</strong> ${reminder.interval}
-                <button onclick="deleteReminder(${reminder.id})" class="btn">Delete</button>
-            `;
-            reminderList.appendChild(reminderItem);
-        } else {
-            console.error('Element with class "reminder-list" not found.');
-        }
-    }
-
-    function deleteReminder(reminderId) {
-        fetch(`/delete_reminder/${reminderId}`, {
-            method: 'DELETE'
-        }).then(response => {
-            if (response.ok) {
-                loadReminders();
-            } else {
-                alert('Failed to delete reminder. Please try again.');
-            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('Failed to set reminder. Please try again.');
         });
     }
 
@@ -68,124 +45,68 @@ document.addEventListener('DOMContentLoaded', function() {
                 reminders.forEach(reminder => {
                     displayReminder(reminder);
                 });
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('Failed to load reminders. Please try again.');
             });
     }
-});
 
-//auth.js
-
-document.addEventListener('DOMContentLoaded', function() {
-    const signupForm = document.getElementById('signupForm');
-    if (signupForm) {
-        signupForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            if (validateForm(signupForm)) {
-                handleSignup(event);
-            }
-        });
-    }
-
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-    }
-
-    const logoutButton = document.getElementById('logout');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', handleLogout);
-    }
-
-    function validateForm(form) {
-        let isValid = true;
-        const email = form.elements['email'];
-        const password = form.elements['password'];
-        const passwordVerify = form.elements['passwordVerify'];
-
-        if (!email.value.includes('@')) {
-            isValid = false;
-            email.setCustomValidity('Please enter a valid email address.');
+    function displayReminder(reminder) {
+        const reminderList = document.querySelector('.reminder-list');
+        if (reminderList) {
+            const reminderItem = document.createElement('div');
+            reminderItem.className = 'reminder-item';
+            reminderItem.innerHTML = `
+                <strong>Reminder:</strong> ${reminder.reminder_type} <br> 
+                <strong>Interval:</strong> ${reminder.interval}
+                <button onclick="completeReminder(${reminder.id})" class="btn">Completed</button>
+                <button onclick="deleteReminder(${reminder.id})" class="btn">Delete</button>
+            `;
+            reminderList.appendChild(reminderItem);
         } else {
-            email.setCustomValidity('');
+            console.error('Element with class "reminder-list" not found.');
         }
-
-        if (password.value.length <= 8) {
-            isValid = false;
-            password.setCustomValidity('Password must be at least 8 characters long.');
-        } else {
-            password.setCustomValidity('');
-        }
-
-        if (passwordVerify && password.value !== passwordVerify.value) {
-            isValid = false;
-            passwordVerify.setCustomValidity('Passwords do not match.');
-        } else if (passwordVerify) {
-            passwordVerify.setCustomValidity('');
-        }
-
-        return isValid;
     }
 
-    function handleSignup(event) {
-        event.preventDefault();
-        const userData = {
-            name: document.getElementById('name').value,
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value,
-            passwordVerify: document.getElementById('passwordVerify').value,
-            birthday: document.getElementById('birthday').value,
-            sex: document.getElementById('sex').value
-        };
-    
-        fetch('/signup', {
+    window.completeReminder = function(reminderId) {
+        fetch(`/complete_reminder/${reminderId}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams(userData)
+                'Content-Type': 'application/json'
+            }
         }).then(response => {
             if (response.ok) {
-                window.location.href = '/features'; // Redirect to features page
+                loadReminders(); // Refresh the list of reminders
             } else {
                 response.json().then(data => {
-                    alert(`Signup failed: ${data.message}`);
+                    alert(`Failed to mark reminder as completed: ${data.message}`);
                 });
             }
         }).catch(error => {
             console.error('Error:', error);
-            alert('Signup failed. Please try again.');
+            alert('Failed to mark reminder as completed. Please try again.');
         });
-    }
+    };
 
-    function handleLogin(event) {
-        event.preventDefault();
-        const email = event.target.elements['email'].value;
-        const password = event.target.elements['password'].value;
-
-        fetch('/login', {
-            method: 'POST',
+    window.deleteReminder = function(reminderId) {
+        fetch(`/delete_reminder/${reminderId}`, {
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
+            }
         }).then(response => {
             if (response.ok) {
-                window.location.href = '/features'; // Redirect to features page
+                loadReminders(); // Refresh the list of reminders
             } else {
-                alert('Login failed: Invalid email or password');
+                response.json().then(data => {
+                    alert(`Failed to delete reminder: ${data.message}`);
+                });
             }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('Failed to delete reminder. Please try again.');
         });
-    }
-
-    function handleLogout(event) {
-        event.preventDefault(); // Prevent form from submitting
-        fetch('/logout', {
-            method: 'POST'
-        }).then(response => {
-            if (response.ok) {
-                window.location.href = '/'; // Redirect to the home page
-            }
-        });
-    }
+    };
 });
 
 
@@ -249,6 +170,139 @@ document.addEventListener('DOMContentLoaded', function() {
                 navToggle.setAttribute('aria-expanded', 'false');
                 navList.classList.remove('active');
             }
+        });
+    }
+});
+
+
+// auth.js 
+
+document.addEventListener('DOMContentLoaded', function() {
+    const signupForm = document.getElementById('signupForm');
+    if (signupForm) {
+        signupForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (validateForm(signupForm)) {
+                handleSignup(event);
+            }
+        });
+    }
+
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+
+    const logoutButton = document.getElementById('logout');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', handleLogout);
+    }
+
+    function validateForm(form) {
+        let isValid = true;
+        const email = form.elements['email'];
+        const password = form.elements['password'];
+        const passwordVerify = form.elements['passwordVerify'];
+
+        if (email && !email.value.includes('@')) {
+            isValid = false;
+            email.setCustomValidity('Please enter a valid email address.');
+        } else if (email) {
+            email.setCustomValidity('');
+        }
+
+        if (password.value.length < 8) {
+            isValid = false;
+            password.setCustomValidity('Password must be at least 8 characters long.');
+        } else {
+            password.setCustomValidity('');
+        }
+
+        if (passwordVerify && password.value !== passwordVerify.value) {
+            isValid = false;
+            passwordVerify.setCustomValidity('Passwords do not match.');
+        } else if (passwordVerify) {
+            passwordVerify.setCustomValidity('');
+        }
+
+        return isValid;
+    }
+
+    function handleSignup(event) {
+        const userData = {
+            name: document.getElementById('name').value,
+            username: document.getElementById('username').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            passwordVerify: document.getElementById('passwordVerify').value,
+            birthday: document.getElementById('birthday').value,
+            sex: document.getElementById('sex').value
+        };
+
+        fetch('/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(userData)
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = '/features'; // Redirect to features page
+            } else {
+                response.json().then(data => {
+                    alert(`Signup failed: ${data.message}`);
+                });
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('Signup failed. Please try again.');
+        });
+    }
+
+    function handleLogin(event) {
+        event.preventDefault();
+
+        const loginIdentity = document.getElementById('login_identity').value;
+        const password = document.getElementById('password').value;
+
+        fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ login_identity: loginIdentity, password: password })
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.json().then(data => {
+                    throw new Error(data.message);
+                });
+            }
+        }).then(data => {
+            alert(data.message);
+            if (data.message === "Login successful!") {
+                window.location.href = data.redirect_url; // Redirect to features page on successful login
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('Failed to login. Please try again.');
+        });
+    }
+
+    function handleLogout(event) {
+        event.preventDefault(); // Prevent form from submitting
+        fetch('/logout', {
+            method: 'POST'
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = '/'; // Redirect to the home page
+            } else {
+                alert('Logout failed. Please try again.');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('Logout failed. Please try again.');
         });
     }
 });

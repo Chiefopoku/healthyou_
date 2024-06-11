@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthYou</title>
+    <title>HealthYou - Features</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
 </head>
 <body>
@@ -95,7 +95,8 @@
             <li><a href="{{ url_for('index') }}">Home</a></li>
             <li><a href="{{ url_for('features') }}">Features</a></li>
             <li><a href="{{ url_for('about') }}">About</a></li>
-            <li><a href="{{ url_for('account') }}">Account</a></li>
+            <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
         </ul>
         <div>
             <a href="https://chiefopoku.github.io/social_links-profile/"><img src="{{ url_for('static', filename='Assets/icons/facebook.png') }}" height="30" alt="Facebook Icon"></a>
@@ -104,32 +105,6 @@
         </div>
         <p>Contact us: healthyou@gmail.com | (+233) 2454-86439</p>
     </footer>
-    <script>
-        document.getElementById('bmiForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const weight = parseFloat(document.getElementById('weight').value);
-            const height = parseFloat(document.getElementById('height').value);
-
-            if (weight > 0 && height > 0) {
-                const bmi = weight / (height * height);
-                let resultText = `Your BMI is ${bmi.toFixed(2)}.`;
-
-                if (bmi < 18.5) {
-                    resultText += " You are underweight.";
-                } else if (bmi >= 18.5 && bmi < 24.9) {
-                    resultText += " You have a normal weight.";
-                } else if (bmi >= 25 && bmi < 29.9) {
-                    resultText += " You are overweight.";
-                } else {
-                    resultText += " You are obese.";
-                }
-
-                document.getElementById('bmiResult').innerText = resultText;
-            } else {
-                document.getElementById('bmiResult').innerText = "Please enter valid weight and height.";
-            }
-        });
-    </script>
     <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </body>
 </html>
