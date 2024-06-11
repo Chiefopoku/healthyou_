@@ -229,6 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleSignup(event) {
+        event.preventDefault();
         const userData = {
             name: document.getElementById('name').value,
             username: document.getElementById('username').value,
@@ -244,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: new URLSearchParams(userData)
+            body: new URLSearchParams(userData).toString()
         }).then(response => {
             if (response.ok) {
                 window.location.href = '/features'; // Redirect to features page
@@ -282,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }).then(data => {
             alert(data.message);
             if (data.message === "Login successful!") {
-                window.location.href = data.redirect_url; // Redirect to features page on successful login
+                window.location.href = '/features'; // Redirect to features page on successful login
             }
         }).catch(error => {
             console.error('Error:', error);
