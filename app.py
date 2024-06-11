@@ -1,6 +1,7 @@
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
@@ -13,6 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'he
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Define User model
 class User(db.Model):
@@ -175,7 +177,6 @@ def delete_reminder(reminder_id):
     return jsonify({"message": "Reminder not found"}), 404
 
 @app.route('/about')
-@login_required
 def about():
     return render_template('about.html')
 
