@@ -53,6 +53,6 @@ if not os.path.exists(migrate_directory):
 # Use the application context for migration commands
 with app.app_context():
     if not os.path.exists(os.path.join(migrate_directory, 'alembic.ini')):
-        init(directory=migrate_directory)
-    migrate(message="Initial migration.", directory=migrate_directory)
-    upgrade(directory=migrate_directory)
+        init()
+    migrate(message="Initial migration.")
+    upgrade()
