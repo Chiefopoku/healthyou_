@@ -2,6 +2,7 @@ from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_migrate import Migrate # type: ignore
 import os
 
 app = Flask(__name__)
