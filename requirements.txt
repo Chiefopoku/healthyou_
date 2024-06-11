@@ -8,4 +8,4 @@ click==8.0.1
 bcrypt==3.2.0
 Flask-SQLAlchemy==2.5.1
 SQLAlchemy==1.4.22
-Flask-Migrate
+
