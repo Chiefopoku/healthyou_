@@ -50,12 +50,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Failed to load reminders. Please try again.');
             });
     }
-
+    
     function displayReminder(reminder) {
         const reminderList = document.querySelector('.reminder-list');
         if (reminderList) {
             const reminderItem = document.createElement('div');
             reminderItem.className = 'reminder-item';
+            if (reminder.completed) {
+                reminderItem.classList.add('completed');
+            }
             reminderItem.innerHTML = `
                 <strong>Reminder:</strong> ${reminder.reminder_type} <br> 
                 <strong>Interval:</strong> ${reminder.interval}
@@ -67,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Element with class "reminder-list" not found.');
         }
     }
-
+    
     window.completeReminder = function(reminderId) {
         fetch(`/complete_reminder/${reminderId}`, {
             method: 'POST',
@@ -87,6 +90,9 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Failed to mark reminder as completed. Please try again.');
         });
     };
+    
+    // Call loadReminders when the page loads
+document.addEventListener('DOMContentLoaded', loadReminders);
 
     window.deleteReminder = function(reminderId) {
         fetch(`/delete_reminder/${reminderId}`, {

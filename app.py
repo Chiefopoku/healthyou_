@@ -12,8 +12,8 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Secure random secret key
 
-# Configure PostgreSQL database
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+# Configure MySQL database
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql://username:password@localhost/healthyou')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -25,16 +25,11 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(512), nullable=False)  # Updated length
     birthday = db.Column(db.String(10), nullable=False)
     sex = db.Column(db.String(10), nullable=False)
 
-    def set_password(self, password):
-        self.password = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
-
+# Define Reminder model
 class Reminder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -42,6 +37,7 @@ class Reminder(db.Model):
     interval = db.Column(db.String(100), nullable=False)
     completed = db.Column(db.Boolean, default=False)
 
+    # Define Contact model
 class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -82,7 +78,7 @@ def signup():
             return jsonify({"message": "Email or Username already exists!"}), 400
 
         new_user = User(name=name, username=username, email=email, birthday=birthday, sex=sex)
-        new_user.set_password(password)
+        new_user.password = generate_password_hash(password)
         db.session.add(new_user)
         db.session.commit()
 
@@ -103,9 +99,9 @@ def login():
 
         user = User.query.filter((User.email == login_identity) | (User.username == login_identity)).first()
 
-        if user and user.check_password(password):
+        if user and check_password_hash(user.password, password):
             session['user_id'] = user.id
-            return redirect(url_for('features'))
+            return jsonify({"message": "Login successful!"}), 200
         else:
             return jsonify({"message": "Invalid credentials!"}), 401
 
@@ -116,25 +112,40 @@ def login():
 def features():
     return render_template('features.html')
 
-@app.route('/features', methods=['POST'])
+@app.route('/get_reminders')
+@login_required
+def get_reminders():
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({"message": "User not authenticated"}), 401
+
+        reminders = Reminder.query.filter_by(user_id=user_id).all()
+        reminders_list = [{
+            'id': reminder.id,
+            'reminder_type': reminder.reminder_type,
+            'interval': reminder.interval,
+            'completed': reminder.completed
+        } for reminder in reminders]
+        
+        return jsonify(reminders_list), 200
+    except Exception as e:
+        print(f"Error loading reminders: {e}")
+        return jsonify({"message": "Error loading reminders"}), 500
+
+@app.route('/set_reminder', methods=['POST'])
 @login_required
 def set_reminder():
     reminder_type = request.form.get('reminder-type')
     interval = request.form.get('interval')
+
+    if not reminder_type or not interval:
+        return jsonify({"message": "Missing data"}), 400
+
     new_reminder = Reminder(user_id=session['user_id'], reminder_type=reminder_type, interval=interval)
     db.session.add(new_reminder)
     db.session.commit()
     return jsonify({"message": "Reminder set successfully"}), 200
-
-@app.route('/get_reminders')
-@login_required
-def get_reminders():
-    reminders = Reminder.query.filter_by(user_id=session['user_id']).all()
-    return jsonify([{
-        'id': reminder.id,
-        'reminder_type': reminder.reminder_type,
-        'interval': reminder.interval
-    } for reminder in reminders])
 
 @app.route('/complete_reminder/<int:reminder_id>', methods=['POST'])
 @login_required
@@ -179,6 +190,5 @@ def contact():
     return jsonify({"message": "Message sent successfully!"}), 200
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # Create tables if they don't exist
+    db.create_all()  # Create tables if they don't exist
     app.run(debug=True)
