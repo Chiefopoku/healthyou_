@@ -2,8 +2,10 @@ services:
   - type: web
     name: healthyou
     env: python
-    plan: starter
-    buildCommand: 
-      - pip install -r requirements.txt
-      - python migrate.py  # Ensure migrations are run before starting the app
-    startCommand: gunicorn -w 4 -b 0.0.0.0:8000 app:app
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask db upgrade && python app.py
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql+psycopg2://healthyou_postgres_user:15zhnxR7eVmwXJFTDApzaHaEDy8grHie@dpg-cpll58674orc7399fpvg-a/healthyou_postgres
+      - key: SECRET_KEY
+        value: chief
