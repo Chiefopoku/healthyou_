@@ -3,7 +3,7 @@ services:
     name: healthyou
     env: python
     plan: starter
-    buildCommand: 
-      - pip install -r requirements.txt
-      - python migrate.py  # Ensure migrations are run before starting the app
+    buildCommand: |
+      pip install -r requirements.txt
+      python migrate.py 
     startCommand: gunicorn -w 4 -b 0.0.0.0:8000 app:app
