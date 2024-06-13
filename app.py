@@ -3,13 +3,20 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
 import os
 
+load_dotenv()  # Load environment variables from .env file if it exists
+
 app = Flask(__name__)
-app.secret_key = os.urandom(24)  # Secure random secret key
+app.secret_key = os.getenv('SECRET_KEY', os.urandom(24))  # Secure random secret key
 
 # Configure PostgreSQL database
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')  # Use environment variable for security
+database_url = os.getenv('DATABASE_URL')
+if not database_url:
+    raise ValueError("No DATABASE_URL set for SQLAlchemy application.")
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
