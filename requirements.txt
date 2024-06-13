@@ -4,3 +4,5 @@ Flask-Migrate==3.1.0
 Werkzeug==2.1.2
 PyMySQL==1.0.2
 SQLAlchemy==1.4.35
+pymysql
+gunicorn
