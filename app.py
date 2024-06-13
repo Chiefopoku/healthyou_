@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import os
 
-load_dotenv()  # Load environment variables from .env file if it exists
+load_dotenv()  # Load environment variables from .env file if present
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', os.urandom(24))  # Secure random secret key
