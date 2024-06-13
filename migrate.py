@@ -4,7 +4,7 @@ from flask_migrate import Migrate, init, migrate, upgrade
 from dotenv import load_dotenv
 import os
 
-load_dotenv()  # Load environment variables from .env file if it exists
+load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
