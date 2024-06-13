@@ -3,14 +3,14 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
+import pymysql
 import os
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Secure random secret key
 
-# Configure SQLite database
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'healthyou.db')
+# Configure MySQL database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Emmanue1.@localhost/healthyou'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -22,7 +22,7 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(512), nullable=False)
     birthday = db.Column(db.String(10), nullable=False)
     sex = db.Column(db.String(10), nullable=False)
 

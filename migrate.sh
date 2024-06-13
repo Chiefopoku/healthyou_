@@ -1,7 +1,3 @@
-#!/bin/bash
-
-export FLASK_APP=app.py
-
-flask db init
-flask db migrate -m "Initial migration."
+# migrate.sh
 flask db upgrade
+exec gunicorn -w 4 -b 0.0.0.0:8000 app:app
