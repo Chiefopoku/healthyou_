@@ -7,3 +7,4 @@ SQLAlchemy==1.4.35
 pymysql
 gunicorn
 python-dotenv
+psycopg2-binary
