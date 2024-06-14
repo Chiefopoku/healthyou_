@@ -6,6 +6,4 @@ services:
     startCommand: flask db upgrade && python app.py
     envVars:
       - key: DATABASE_URL
-        value: postgresql+psycopg2://healthyou_postgres_user:15zhnxR7eVmwXJFTDApzaHaEDy8grHie@dpg-cpll58674orc7399fpvg-a/healthyou_postgres
-      - key: SECRET_KEY
-        value: chief
+        value: postgresql+psycopg2://healthyou_postgres_user:15zhnxR7eVmwXJFTDApzaHaEDy8grHie@dpg-cpll58674orc7399fpvg-a:5432/healthyou_postgres
