@@ -1,4 +1,4 @@
-// reminders.js
+// reminders
 
 document.addEventListener('DOMContentLoaded', function() {
     const reminderForm = document.getElementById('reminder-form');
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', loadReminders);
 });
 
 
-// notifications.js
+// notifications
 
 // Function to show browser notifications
 function showNotification(message) {
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// navToggle.js
+// navToggle
 
 document.addEventListener('DOMContentLoaded', function() {
     const navToggle = document.getElementById('navToggle');
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-// auth.js 
+// auth
 
 document.addEventListener('DOMContentLoaded', function() {
     const signupForm = document.getElementById('signupForm');
